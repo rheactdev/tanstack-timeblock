@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { ArrowLeft, Columns3, ListFilter, Search, Settings2, UserRound, X } from 'lucide-react'
-import { periodColumns, periodLabel, periodStart, samePeriod, scheduleKey, sortedTasks, todayInZone } from '../lib/calendar'
+import { formatDate, periodColumns, periodStart, samePeriod, scheduleKey, sortedTasks, todayInZone } from '../lib/calendar'
 import type { Horizon, PlannerSearch, PlannerView, Schedule, Task, WorkspaceData } from '../lib/model'
 import { filterTasks } from '../lib/model'
 import { useWorkspace } from './use-workspace'
@@ -87,14 +87,21 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
     if (search.goal === task.id) closeGoal()
     toast({ title: 'Goal deleted', duration: 8000, action: { label: 'Undo', onClick: () => { void mutate({ action: 'restore', id: task.id }) } } })
   }
-  const todayLabel = periodLabel({ horizon: 'day', date: cursor }, today)
+  const cursorLabel = formatDate(cursor, { month: 'short', day: 'numeric', year: 'numeric' })
 
   return <>
     <WorkspaceSidebar user={data.user} view={view} saving={saving} progress={progress} completed={data.tasks.filter(task => task.completed && !task.deletedAt).length} total={data.tasks.filter(task => !task.deletedAt).length} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
-      <header className="planner-topbar"><SidebarToggle aria-label="Toggle workspace navigation" /><span>{viewLabels[view]}</span><IconButton label="Filters" onClick={() => setDialog('filters')}><ListFilter size={18} /></IconButton></header>
-      {!combined && <div className="period-view-bar"><button onClick={() => go('horizons')}><ArrowLeft size={15} />Horizons</button><span>{viewLabels[view]}</span><CursorPicker cursor={cursor} today={today} label={todayLabel} onSelect={date => updateSearch({ date })} /><button className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</button></div>}
+      <header className="planner-topbar">
+        <SidebarToggle aria-label="Toggle workspace navigation" />
+        {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
+        <span className="planner-view-name">{viewLabels[view]}</span>
+        <div className="planner-topbar-actions">
+          {!combined && <><CursorPicker cursor={cursor} today={today} label={cursorLabel} onSelect={date => updateSearch({ date })} /><button type="button" className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</button></>}
+          <IconButton label="Filters" onClick={() => setDialog('filters')}><ListFilter size={18} /></IconButton>
+        </div>
+      </header>
       {filtered && <div className="active-filters-bar"><ListFilter size={13} /><span>{search.q ? `“${search.q}” · ` : ''}{visibleTasks.length} matching goals</span><button onClick={() => updateSearch({ q: '', color: 'all', completed: true, board: 'all' })}>Clear filters<X size={12} /></button></div>}
       <div className="horizons-layout"><div ref={scroll} className={`horizon-columns ${expanded.length === 0 ? 'all-collapsed' : ''}`}>
         {expanded.map(schedule => <HorizonColumn key={scheduleKey(schedule)} schedule={schedule} tasks={sortedTasks(visibleTasks.filter(task => samePeriod(task, schedule)), data.preferences.sorts[scheduleKey(schedule)])} today={today} mutate={mutate} collapsible={combined} onCollapse={collapse} onFocus={focus} dragging={dragging} setDragging={setDragging} onOpen={openGoal} onSchedule={setReschedule} onPosition={setPosition} onDelete={task => void removeGoal(task)} expandedCount={expanded.length} dedicated={!combined} />)}
