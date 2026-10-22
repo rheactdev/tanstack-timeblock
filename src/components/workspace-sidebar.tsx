@@ -153,24 +153,6 @@ export function WorkspaceSidebar({
           </SidebarItem>
           <SidebarItem
             type="button"
-            icon={<Trash2 />}
-            tooltip="Deleted goals"
-            aria-label="Deleted goals"
-            onClick={() => showDialog("deleted")}
-          >
-            Deleted goals
-          </SidebarItem>
-          <SidebarItem
-            type="button"
-            icon={<CircleHelp />}
-            tooltip="Help"
-            aria-label="Help"
-            onClick={() => showDialog("help")}
-          >
-            Help
-          </SidebarItem>
-          <SidebarItem
-            type="button"
             icon={<Settings2 />}
             tooltip="Settings"
             aria-label="Settings"
