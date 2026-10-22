@@ -27,7 +27,6 @@ import {
   SidebarHeader,
   SidebarItem,
   SidebarSeparator,
-  SidebarToggle,
   useSidebar,
 } from "./ui/sidebar";
 
@@ -87,20 +86,10 @@ export function WorkspaceSidebar({
       role="navigation"
       aria-label="Workspace tools"
     >
-      <SidebarHeader className="shrink-0 gap-3">
-        {expanded && (
-          <span className="min-w-0 flex-1 truncate font-bold">Horizons</span>
-        )}
-        {!isMobile && (
-          <SidebarToggle
-            aria-label={
-              expanded
-                ? "Collapse workspace sidebar"
-                : "Expand workspace sidebar"
-            }
-            aria-expanded={expanded}
-          />
-        )}
+      <SidebarHeader className="shrink-0">
+        <span className="min-w-0 truncate font-bold" aria-label="Horizons">
+          {expanded ? "Horizons" : "H"}
+        </span>
       </SidebarHeader>
       <SidebarContent className="min-h-0 space-y-6 group-data-[state=collapsed]/sidebar:p-2">
         <SidebarGroup>

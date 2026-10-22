@@ -6,11 +6,6 @@ import { PanelLeft } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Button } from './button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from './sheet'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from './tooltip'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -246,7 +241,7 @@ const SidebarToggle = React.forwardRef<
       ref={ref}
       variant="outline"
       size="icon"
-      className={cn('h-8 w-8 transition-transform duration-300', className)}
+      className={cn('h-8 w-8 hover:translate-x-0 hover:translate-y-0 active:translate-x-0 active:translate-y-0', className)}
       onClick={toggleSidebar}
       {...props}
     >
@@ -372,9 +367,12 @@ const SidebarItem = React.forwardRef<HTMLButtonElement, SidebarItemProps>(
     const { state, isMobile } = useSidebar()
     const isCollapsed = state === 'collapsed' && !isMobile
 
-    const button = (
+    return (
       <button
         ref={ref}
+        type="button"
+        title={isCollapsed ? tooltip : undefined}
+        aria-label={tooltip}
         className={cn(
           sidebarItemVariants({ variant }),
           isCollapsed && 'justify-center px-2',
@@ -382,21 +380,10 @@ const SidebarItem = React.forwardRef<HTMLButtonElement, SidebarItemProps>(
         )}
         {...props}
       >
-        {icon && <span className="shrink-0">{icon}</span>}
+        {icon && <span className="pointer-events-none shrink-0">{icon}</span>}
         {!isCollapsed && <span className="truncate">{children}</span>}
       </button>
     )
-
-    if (isCollapsed && tooltip) {
-      return (
-        <Tooltip disableHoverableContent>
-          <TooltipTrigger asChild>{button}</TooltipTrigger>
-          <TooltipContent side="right" className="pointer-events-none animate-none!">{tooltip}</TooltipContent>
-        </Tooltip>
-      )
-    }
-
-    return button
   }
 )
 SidebarItem.displayName = 'SidebarItem'

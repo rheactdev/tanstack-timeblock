@@ -21,6 +21,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid hsl(var(--accent)); o
 .workspace-sync > svg { color: hsl(var(--secondary)); }
 .workspace-stats { font-size: 10px; color: hsl(var(--muted-foreground)); margin: 4px 8px 0; }
 .planner-main { min-width: 0; display: flex; flex-direction: column; background: hsl(var(--card)); overflow: hidden; position: relative; }
+.planner-topbar { display: flex; align-items: center; flex-shrink: 0; gap: 10px; min-height: 49px; padding: 0 13px; border-bottom: 2px solid hsl(var(--foreground) / .15); background: hsl(var(--background)); }
+.planner-topbar > span { font-weight: 700; font-size: 13px; }
+.planner-topbar > button:last-child { margin-left: auto; }
+.planner-topbar .icon-control { width: 26px; height: 30px; }
 .horizons-layout { display: flex; flex: 1; min-height: 0; min-width: 0; }
 .horizon-columns { display: flex; flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #ffffff20 transparent; scroll-snap-type: x proximity; }
 .horizon-column { min-width: 245px; flex: 1 0 245px; display: flex; flex-direction: column; position: relative; min-height: 0; border-right: 2px solid hsl(var(--foreground) / .12); scroll-snap-align: start; transition: background-color .12s; }
@@ -99,7 +103,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid hsl(var(--accent)); o
 .floating-tools .scene-swatch { padding: 3px; background: hsl(var(--foreground)); }
 .scene-swatch > span { width: 100%; height: 100%; background: linear-gradient(145deg, #efabd3, #9a4cd4, #e9d4ed); border: 1px solid #17171b; }
 .floating-tools > .filter-active { background: hsl(var(--accent)); }
-.mobile-topbar { display: none; }
 
 /* BoldKit primitives retain their registry styling; these rules size the planner surfaces. */
 .planner-dialog { width: min(520px, calc(100vw - 32px)); max-width: 680px; max-height: calc(100dvh - 40px); overflow-y: auto; border: 3px solid hsl(var(--foreground)); border-radius: 0; box-shadow: 8px 8px 0 #000; background: hsl(var(--popover)); padding: 27px; gap: 23px; }
@@ -230,10 +233,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid hsl(var(--accent)); o
   .planner-shell { min-height: 480px; }
   .planner-app { grid-template-columns: minmax(0, 1fr); min-height: 480px; }
   .scenery-strip { display: none; }
-  .mobile-topbar { display: flex; align-items: center; gap: 10px; min-height: 49px; padding: 0 13px; border-bottom: 2px solid hsl(var(--foreground) / .15); background: hsl(var(--background)); }
-  .mobile-topbar > span { font-weight: 700; font-size: 13px; }
-  .mobile-topbar > button:last-child { margin-left: auto; }
-  .mobile-topbar .icon-control { width: 26px; height: 30px; }
   .horizon-column, .horizon-column.horizon-year, .horizon-column.horizon-life, .horizon-column.dedicated-column { flex: 1 0 270px; min-width: 235px; }
   .column-header { padding: 25px 17px 20px; min-height: 96px; }
   .column-heading h1 { font-size: 30px; }
