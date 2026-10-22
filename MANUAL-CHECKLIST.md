@@ -12,6 +12,7 @@ Verification is left to you. No tests, builds, type checks, or application brows
 
 - [ ] Confirm there is one BoldKit sidebar, tall plain goal columns, collapsed rails at the right, and a narrow scenic strip. There should be no secondary sidebar or board controls.
 - [ ] Expand and collapse the sidebar, including with ⌘B/Ctrl+B. Check Inbox, Horizons, Days, Weeks, Months, Years, and Life navigation. On mobile, open the sidebar drawer and select a destination.
+- [ ] Collapse the sidebar and navigate between planning views. It should remain collapsed. Expand it and navigate again; it should remain expanded.
 - [ ] Hover each sidebar item, including along its edges. Only its background should change; labels should not flicker or intercept the pointer. The sidebar starts expanded, and Account opens its dialog directly without a popover.
 - [ ] In collapsed mode, hover an item long enough to see its native browser label. Sidebar items should not open animated tooltip portals. Toggle the sidebar from the main content toolbar; its button should stay under the pointer on hover.
 - [ ] Confirm dark BoldKit surfaces, Outfit typography, square bordered controls, hard shadows, and coral/teal/yellow accents. There should be no dashboard hero, motivational quote panel, numbered columns, or invented category badges.

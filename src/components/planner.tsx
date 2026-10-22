@@ -8,7 +8,7 @@ import { useWorkspace } from './use-workspace'
 import { Button } from './ui/button'
 import { toast } from './ui/toast'
 import { IconButton } from './planner-controls'
-import { SidebarInset, SidebarProvider, SidebarToggle } from './ui/sidebar'
+import { SidebarInset, SidebarToggle } from './ui/sidebar'
 import { WorkspaceSidebar } from './workspace-sidebar'
 import { HorizonColumn } from './horizon-column'
 import { GoalEditor, PositionDialog } from './goal-editor'
@@ -89,7 +89,7 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
   }
   const todayLabel = periodLabel({ horizon: 'day', date: cursor }, today)
 
-  return <SidebarProvider className="planner-shell">
+  return <>
     <WorkspaceSidebar user={data.user} view={view} saving={saving} progress={progress} completed={data.tasks.filter(task => task.completed && !task.deletedAt).length} total={data.tasks.filter(task => !task.deletedAt).length} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
@@ -115,5 +115,5 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
     {dialog === 'account' && <AccountDialog user={data.user} pendingSaves={saving} onClose={() => setDialog(null)} onChanged={async () => { await router.invalidate(); setDialog(null); go('horizons', { date: undefined, q: '', completed: true, color: 'all', goal: undefined }) }} />}
     {dialog === 'help' && <HelpDialog onClose={() => setDialog(null)} />}
     </SidebarInset>
-  </SidebarProvider>
+  </>
 }

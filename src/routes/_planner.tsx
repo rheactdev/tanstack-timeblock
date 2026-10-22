@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, stripSearchParams } from '@tanstack/react-router'
 import { getWorkspace, getProgress } from '../lib/functions'
 import { searchSchema, defaultSearch } from '../lib/model'
+import { SidebarProvider } from '../components/ui/sidebar'
 
 export const Route = createFileRoute('/_planner')({
   ssr: true,
@@ -10,5 +11,9 @@ export const Route = createFileRoute('/_planner')({
     const workspace = await getWorkspace()
     return { workspace, progress: getProgress() }
   },
-  component: Outlet,
+  component: PlannerLayout,
 })
+
+function PlannerLayout() {
+  return <SidebarProvider className="planner-shell"><Outlet /></SidebarProvider>
+}
