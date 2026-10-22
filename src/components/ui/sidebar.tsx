@@ -346,7 +346,7 @@ SidebarGroupLabel.displayName = 'SidebarGroupLabel'
 
 // Sidebar Item
 const sidebarItemVariants = cva(
-  'flex w-full items-center gap-3 px-3 py-2 text-sm transition duration-150',
+  'flex w-full items-center gap-3 px-3 py-2 text-sm transition-colors duration-150',
   {
     variants: {
       variant: {
@@ -389,9 +389,9 @@ const SidebarItem = React.forwardRef<HTMLButtonElement, SidebarItemProps>(
 
     if (isCollapsed && tooltip) {
       return (
-        <Tooltip>
+        <Tooltip disableHoverableContent>
           <TooltipTrigger asChild>{button}</TooltipTrigger>
-          <TooltipContent side="right">{tooltip}</TooltipContent>
+          <TooltipContent side="right" className="pointer-events-none animate-none!">{tooltip}</TooltipContent>
         </Tooltip>
       )
     }

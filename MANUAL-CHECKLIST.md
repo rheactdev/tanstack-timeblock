@@ -12,6 +12,7 @@ Verification is left to you. No tests, builds, type checks, or application brows
 
 - [ ] Confirm there is one BoldKit sidebar, tall plain goal columns, collapsed rails at the right, and a narrow scenic strip. There should be no secondary sidebar or board controls.
 - [ ] Expand and collapse the sidebar, including with ⌘B/Ctrl+B. Check Inbox, Horizons, Days, Weeks, Months, Years, and Life navigation. On mobile, open the sidebar drawer and select a destination.
+- [ ] Hover each sidebar item, including along its edges. Only its background should change; labels should not flicker or intercept the pointer. The sidebar starts expanded, and Account opens its dialog directly without a popover.
 - [ ] Confirm dark BoldKit surfaces, Outfit typography, square bordered controls, hard shadows, and coral/teal/yellow accents. There should be no dashboard hero, motivational quote panel, numbered columns, or invented category badges.
 - [ ] On a new workspace, Inbox, Year, and Life start expanded. Expand Day, collapse another column with its header icon, reload, and confirm the arrangement is retained.
 - [ ] Hover or keyboard-focus a column heading. Only Add and Collapse should appear next to the title; Add focuses the inline goal input. Touch devices keep these controls visible. Column bottoms should have no date navigation bars.

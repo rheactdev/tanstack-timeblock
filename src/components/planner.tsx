@@ -89,7 +89,7 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
   }
   const todayLabel = periodLabel({ horizon: 'day', date: cursor }, today)
 
-  return <SidebarProvider defaultOpen={false} className="planner-shell">
+  return <SidebarProvider className="planner-shell">
     <WorkspaceSidebar user={data.user} view={view} saving={saving} progress={progress} completed={data.tasks.filter(task => task.completed && !task.deletedAt).length} total={data.tasks.filter(task => !task.deletedAt).length} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
