@@ -15,5 +15,8 @@ export const Route = createFileRoute('/_planner')({
 })
 
 function PlannerLayout() {
-  return <SidebarProvider className="planner-shell"><Outlet /></SidebarProvider>
+  return <div className="planner-layout">
+    <div className="planner-accent-strip" aria-hidden="true"><span /><span /><span /><span /><span /></div>
+    <SidebarProvider className="planner-shell"><Outlet /></SidebarProvider>
+  </div>
 }

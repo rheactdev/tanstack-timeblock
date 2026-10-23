@@ -94,12 +94,17 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
       <header className="planner-topbar">
-        <SidebarToggle aria-label="Toggle workspace navigation" />
-        {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
-        <span className="planner-view-name">{viewLabels[view]}</span>
-        <div className="planner-topbar-actions">
-          {!combined && <><CursorPicker cursor={cursor} today={today} label={cursorLabel} onSelect={date => updateSearch({ date })} /><button type="button" className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</button></>}
-          <IconButton label="Filters" onClick={() => setDialog('filters')}><ListFilter size={18} /></IconButton>
+        <div className="planner-topbar-content">
+          <div className="planner-topbar-heading">
+            <SidebarToggle className="planner-topbar-control" aria-label="Toggle workspace navigation" />
+            {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
+            <span className="planner-view-name">{viewLabels[view]}</span>
+          </div>
+          <div className="planner-topbar-actions">
+            {!combined && <><CursorPicker cursor={cursor} today={today} label={cursorLabel} onSelect={date => updateSearch({ date })} /><Button type="button" variant="outline" size="sm" className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</Button></>}
+            <Button type="button" variant="outline" className="planner-topbar-search" aria-label="Search goals (Command or Control + K)" aria-haspopup="dialog" onClick={() => setDialog('search')}><Search aria-hidden="true" /><span>Search...</span><kbd aria-hidden="true"><span>⌘</span>K</kbd></Button>
+            <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label="Filters" aria-haspopup="dialog" title="Filters" data-active={filtered || undefined} onClick={() => setDialog('filters')}><ListFilter aria-hidden="true" /></Button>
+          </div>
         </div>
       </header>
       {filtered && <div className="active-filters-bar"><ListFilter size={13} /><span>{search.q ? `“${search.q}” · ` : ''}{visibleTasks.length} matching goals</span><button onClick={() => updateSearch({ q: '', color: 'all', completed: true, board: 'all' })}>Clear filters<X size={12} /></button></div>}
@@ -108,7 +113,7 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
         {expanded.length === 0 && <div className="collapsed-empty"><Columns3 size={26} /><p>Expand a horizon to see your goals.</p><Button variant="outline" size="sm" onClick={() => void mutate({ action: 'preferences', patch: { collapsed: [] } })}>Expand all</Button></div>}
       </div>{collapsed.length > 0 && <div className="collapsed-horizons" aria-label="Collapsed horizons">{collapsed.map(schedule => <button key={schedule.horizon} className={`collapsed-horizon collapsed-${schedule.horizon}`} onClick={() => collapse(schedule.horizon)} aria-label={`Expand ${horizonLabels[schedule.horizon]}`}><span>{horizonLabels[schedule.horizon]}</span></button>)}</div>}</div>
     </main>
-    <aside className="scenery-strip" aria-label="Workspace controls"><div className="scenery-image" /><div className="scenery-tint" /><div className="floating-tools"><IconButton label="Change background" className="scene-swatch" onClick={() => setDialog('appearance')}><span /></IconButton><IconButton label="Account" onClick={() => setDialog('account')}><UserRound size={22} /></IconButton><IconButton label="Filters" className={filtered ? 'filter-active' : ''} onClick={() => setDialog('filters')}><ListFilter size={22} /></IconButton><CursorPicker cursor={cursor} today={today} onSelect={date => updateSearch({ date })} label="Jump to a date" /><IconButton label="Search" onClick={() => setDialog('search')}><Search size={22} /></IconButton><IconButton label="Settings" onClick={() => setDialog('settings')}><Settings2 size={22} /></IconButton></div></aside>
+    <aside className="scenery-strip grid-pattern" aria-label="Workspace controls"><div className="floating-tools"><IconButton label="Change background" className="scene-swatch" onClick={() => setDialog('appearance')}><span /></IconButton><IconButton label="Account" onClick={() => setDialog('account')}><UserRound size={22} /></IconButton><IconButton label="Filters" className={filtered ? 'filter-active' : ''} onClick={() => setDialog('filters')}><ListFilter size={22} /></IconButton><CursorPicker cursor={cursor} today={today} onSelect={date => updateSearch({ date })} label="Jump to a date" /><IconButton label="Search" onClick={() => setDialog('search')}><Search size={22} /></IconButton><IconButton label="Settings" onClick={() => setDialog('settings')}><Settings2 size={22} /></IconButton></div></aside>
 
     {selected && <GoalEditor key={selected.id} task={selected} today={today} mutate={mutate} onClose={closeGoal} onDelete={task => void removeGoal(task)} />}
     {search.goal && !selected && <div className="missing-goal-notice" role="status">This goal is unavailable.<button onClick={closeGoal}>Dismiss</button></div>}

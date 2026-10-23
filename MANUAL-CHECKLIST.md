@@ -12,6 +12,8 @@ Verification is left to you. No tests, builds, type checks, or application brows
 
 - [ ] Confirm there is one BoldKit sidebar, tall plain goal columns, collapsed rails at the right, and a narrow scenic strip. There should be no secondary sidebar or board controls.
 - [ ] Period views have a single toolbar containing the sidebar toggle, Horizons navigation, current view name, date picker, Today action, and filters. The view name and Today action should each appear once.
+- [ ] Confirm the toolbar has a five-color top strip, a solid 3px bottom border, a 56px control row, and square outlined controls. Search opens the search dialog; compact controls remain accessible at narrow widths without moving on hover.
+- [ ] The five-color strip spans the entire app above the sidebar, planner, and scenic strip. The sidebar and planner header borders should align beneath it.
 - [ ] Expand and collapse the sidebar, including with ⌘B/Ctrl+B. Check Inbox, Horizons, Days, Weeks, Months, Years, and Life navigation. On mobile, open the sidebar drawer and select a destination.
 - [ ] Collapse the sidebar and navigate between planning views. It should remain collapsed. Expand it and navigate again; it should remain expanded.
 - [ ] Hover each sidebar item, including along its edges. Only its background should change; labels should not flicker or intercept the pointer. The sidebar starts expanded, and Account opens its dialog directly without a popover.
