@@ -64,9 +64,3 @@ export async function mutateWorkspace(mutation: Mutation): Promise<Workspace> {
   throw new Error('Your workspace changed in another tab. Please try again.')
 }
 
-export async function loadProgress() {
-  const { owner } = await identity()
-  const { workspace } = await workspaceDocument(owner)
-  const active = workspace.tasks.filter(task => !task.deletedAt)
-  return { completed: active.filter(task => task.completed).length, total: active.length }
-}

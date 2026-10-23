@@ -22,7 +22,7 @@ const viewLabels: Record<PlannerView, string> = { horizons: 'Horizons', inbox: '
 const focusViews: Partial<Record<Horizon, NavigationView>> = { inbox: 'inbox', day: 'days', week: 'weeks', month: 'months', year: 'years', life: 'horizons' }
 const navigationHorizons: Partial<Record<PlannerView, DatedHorizon>> = { days: 'day', weeks: 'week', months: 'month', years: 'year' }
 
-export function Planner({ initial, progress, search, view }: { initial: WorkspaceData; progress: Promise<{ completed: number; total: number }>; search: PlannerSearch; view: PlannerView }) {
+export function Planner({ initial, search, view }: { initial: WorkspaceData; search: PlannerSearch; view: PlannerView }) {
   const { toggleSidebar, open, openMobile, isMobile } = useSidebar()
   const { data, saving, mutate } = useWorkspace(initial)
   const [dialog, setDialog] = useState<Dialog>(null)
@@ -95,13 +95,13 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
   const nextDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, 1) : cursor
 
   return <>
-    <WorkspaceSidebar user={data.user} view={view} progress={progress} completed={data.tasks.filter(task => task.completed && !task.deletedAt).length} total={data.tasks.filter(task => !task.deletedAt).length} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
+    <WorkspaceSidebar user={data.user} view={view} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
       <header className="planner-topbar">
         <div className="planner-topbar-content">
           <div className="planner-topbar-heading">
-            <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label="Toggle workspace navigation" title="Toggle workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
+            <Button type="button" variant="secondary" size="icon" className="planner-sidebar-toggle" aria-label="Toggle workspace navigation" title="Toggle workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
             {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
             <span className="planner-view-name">{viewLabels[view]}</span>
           </div>

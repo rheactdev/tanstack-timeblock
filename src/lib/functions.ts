@@ -11,7 +11,3 @@ export const changeWorkspace = createServerFn({ method: 'POST' })
     const { mutateWorkspace } = await import('../server/workspace.server')
     return mutateWorkspace(data)
   })
-export const getProgress = createServerFn({ method: 'GET' }).handler(async () => {
-  const { loadProgress } = await import('../server/workspace.server')
-  return loadProgress()
-})

@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute, stripSearchParams } from '@tanstack/react-router'
-import { getWorkspace, getProgress } from '../lib/functions'
+import { getWorkspace } from '../lib/functions'
 import { searchSchema, defaultSearch } from '../lib/model'
 import { SidebarProvider } from '../components/ui/sidebar'
 import { PlannerPage } from '../components/planner-page'
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_planner')({
   search: { middlewares: [stripSearchParams(defaultSearch)] },
   loader: async () => {
     const workspace = await getWorkspace()
-    return { workspace, progress: getProgress() }
+    return { workspace }
   },
   component: PlannerLayout,
 })

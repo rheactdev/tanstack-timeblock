@@ -260,6 +260,25 @@ a:focus-visible {
   width: 20px;
   height: 20px;
 }
+.workspace-sidebar {
+  --workspace-icon-column: calc(var(--sidebar-width-collapsed) - 3px - 16px);
+  overflow: hidden;
+  transition-property: width;
+}
+.workspace-sidebar-item {
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  overflow: hidden;
+}
+.workspace-sidebar-item > span:first-child,
+.workspace-account-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--workspace-icon-column);
+  flex-shrink: 0;
+}
 .workspace-account-button {
   justify-content: flex-start;
   width: 100%;
@@ -271,22 +290,15 @@ a:focus-visible {
   text-align: left;
   text-transform: none;
   letter-spacing: normal;
+  overflow: hidden;
 }
 .workspace-account-button:hover {
   background: transparent;
-}
-.workspace-account-button[data-collapsed="true"] {
-  justify-content: center;
 }
 .workspace-account-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.workspace-stats {
-  font-size: 10px;
-  color: hsl(var(--muted-foreground));
-  margin: 4px 8px 0;
 }
 .planner-main {
   min-width: 0;
@@ -376,6 +388,15 @@ a:focus-visible {
   align-items: center;
   flex-shrink: 0;
   gap: 6px;
+}
+.planner-sidebar-toggle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  box-shadow: none;
+  transform: none;
+  translate: none;
 }
 .planner-topbar .planner-topbar-control,
 .planner-topbar-search,

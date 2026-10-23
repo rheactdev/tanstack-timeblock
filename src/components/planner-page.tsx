@@ -10,7 +10,7 @@ declare module '@tanstack/react-router' {
 }
 
 export function PlannerPage() {
-  const { workspace, progress } = plannerRoute.useLoaderData()
+  const { workspace } = plannerRoute.useLoaderData()
   const view = useMatches({ select: matches => matches.reduce<PlannerView>((current, match) => match.staticData?.plannerView ?? current, 'horizons') })
-  return <Planner key={workspace.user?.email || 'guest'} initial={workspace} progress={progress} search={plannerRoute.useSearch()} view={view} />
+  return <Planner key={workspace.user?.email || 'guest'} initial={workspace} search={plannerRoute.useSearch()} view={view} />
 }

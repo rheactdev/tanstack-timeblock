@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import { Await } from "@tanstack/react-router";
 import {
   Calendar,
   CalendarDays,
@@ -16,9 +14,7 @@ import { Button } from "./ui/button";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarItem,
   useSidebar,
@@ -37,18 +33,12 @@ const planningViews = [
 export function WorkspaceSidebar({
   user,
   view,
-  progress,
-  completed,
-  total,
   onNavigate,
   onLife,
   onDialog,
 }: {
   user: WorkspaceData["user"];
   view: PlannerView;
-  progress: Promise<{ completed: number; total: number }>;
-  completed: number;
-  total: number;
   onNavigate: (view: PlannerView) => void;
   onLife: () => void;
   onDialog: (dialog: WorkspaceDialog) => void;
@@ -69,18 +59,33 @@ export function WorkspaceSidebar({
   return (
     <Sidebar
       collapsible="icon"
-      className="min-h-0"
+      className="workspace-sidebar min-h-0"
       role="navigation"
       aria-label="Workspace tools"
     >
-      <SidebarHeader className="h-[59px] shrink-0 px-4 py-0 group-data-[state=collapsed]/sidebar:px-2">
-        <span className="min-w-0 truncate font-bold" aria-label="Horizons">
-          {expanded ? "Horizons" : "H"}
-        </span>
+      <SidebarHeader className="h-[59px] shrink-0 px-2 py-0">
+        <Button
+          type="button"
+          variant="ghost"
+          className="workspace-account-button"
+          aria-label={user ? "Your account" : "Sign in"}
+          aria-haspopup="dialog"
+          title={accountName}
+          onClick={() => showDialog("account")}
+        >
+          <span className="workspace-account-icon" aria-hidden="true">
+            <Avatar className="shadow-none transition-colors hover:translate-x-0 hover:translate-y-0 hover:shadow-none">
+              {user?.image && <AvatarImage src={user.image} alt="" />}
+              <AvatarFallback className="text-sm">
+                {initials || <UserRound />}
+              </AvatarFallback>
+            </Avatar>
+          </span>
+          {expanded && <span className="workspace-account-label">{accountName}</span>}
+        </Button>
       </SidebarHeader>
-      <SidebarContent className="min-h-0 space-y-6 group-data-[state=collapsed]/sidebar:p-2">
+      <SidebarContent className="min-h-0 space-y-6 overflow-x-hidden p-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Plan</SidebarGroupLabel>
           {planningViews.map(({ view: target, label, icon: Icon }) => (
             <SidebarItem
               key={target}
@@ -89,7 +94,7 @@ export function WorkspaceSidebar({
               tooltip={label}
               aria-label={label}
               variant={view === target ? "active" : "default"}
-              className={view === target ? "text-accent-foreground" : undefined}
+              className={`workspace-sidebar-item ${view === target ? "text-accent-foreground" : ""}`}
               aria-current={view === target ? "page" : undefined}
               onClick={() => act(() => onNavigate(target))}
             >
@@ -98,6 +103,7 @@ export function WorkspaceSidebar({
           ))}
           <SidebarItem
             type="button"
+            className="workspace-sidebar-item"
             icon={<Mountain />}
             tooltip="Life goals"
             aria-label="Life goals"
@@ -107,41 +113,6 @@ export function WorkspaceSidebar({
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="shrink-0 flex-col items-stretch group-data-[state=collapsed]/sidebar:p-2">
-        <Suspense
-          fallback={
-            <span className={expanded ? "workspace-stats" : "sr-only"}>
-              Loading progress...
-            </span>
-          }
-        >
-          <Await promise={progress}>
-            {() => (
-              <span className={expanded ? "workspace-stats" : "sr-only"}>
-                {completed} completed · {total} goals
-              </span>
-            )}
-          </Await>
-        </Suspense>
-        <Button
-          type="button"
-          variant="ghost"
-          className="workspace-account-button"
-          data-collapsed={!expanded}
-          aria-label={user ? "Your account" : "Sign in"}
-          aria-haspopup="dialog"
-          title={accountName}
-          onClick={() => showDialog("account")}
-        >
-          <Avatar className="shadow-none transition-colors hover:translate-x-0 hover:translate-y-0 hover:shadow-none" aria-hidden="true">
-            {user?.image && <AvatarImage src={user.image} alt="" />}
-            <AvatarFallback className="text-sm">
-              {initials || <UserRound aria-hidden="true" />}
-            </AvatarFallback>
-          </Avatar>
-          {expanded && <span className="workspace-account-label">{accountName}</span>}
-        </Button>
-      </SidebarFooter>
     </Sidebar>
   );
 }
