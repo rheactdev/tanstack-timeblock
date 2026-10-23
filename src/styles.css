@@ -271,6 +271,7 @@ a:focus-visible {
   gap: 12px;
   padding: 8px 0;
   overflow: hidden;
+  transition: none;
 }
 .workspace-sidebar-item > span:first-child,
 .workspace-account-icon,
@@ -519,6 +520,7 @@ a:focus-visible {
 }
 .column-header {
   padding: 15px var(--planner-content-inset);
+  margin-bottom: -10px;
   display: flex;
   align-items: center;
   position: relative;

@@ -94,7 +94,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   const nextDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, 1) : cursor
 
   return <>
-    <WorkspaceSidebar user={data.user} view={view} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
+    <WorkspaceSidebar user={data.user} view={view} search={search} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
       <header className="planner-topbar">

@@ -10,7 +10,8 @@ import {
   PanelLeftOpen,
   UserRound,
 } from "lucide-react";
-import type { PlannerView, WorkspaceData } from "../lib/model";
+import { Link } from "@tanstack/react-router";
+import type { PlannerSearch, PlannerView, WorkspaceData } from "../lib/model";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button, buttonVariants } from "./ui/button";
 import {
@@ -20,29 +21,30 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarItem,
+  sidebarItemVariants,
   useSidebar,
 } from "./ui/sidebar";
 
 type WorkspaceDialog = "account";
 const planningViews = [
-  { view: "horizons", label: "Horizons", icon: Columns3 },
-  { view: "inbox", label: "Inbox", icon: Inbox },
-  { view: "days", label: "Days", icon: CalendarDays },
-  { view: "weeks", label: "Weeks", icon: CalendarRange },
-  { view: "months", label: "Months", icon: Calendar },
-  { view: "years", label: "Years", icon: Flag },
+  { view: "horizons", to: "/horizons", label: "Horizons", icon: Columns3 },
+  { view: "inbox", to: "/inbox", label: "Inbox", icon: Inbox },
+  { view: "days", to: "/days", label: "Days", icon: CalendarDays },
+  { view: "weeks", to: "/weeks", label: "Weeks", icon: CalendarRange },
+  { view: "months", to: "/months", label: "Months", icon: Calendar },
+  { view: "years", to: "/years", label: "Years", icon: Flag },
 ] as const;
 
 export function WorkspaceSidebar({
   user,
   view,
-  onNavigate,
+  search,
   onLife,
   onDialog,
 }: {
   user: WorkspaceData["user"];
   view: PlannerView;
-  onNavigate: (view: PlannerView) => void;
+  search: PlannerSearch;
   onLife: () => void;
   onDialog: (dialog: WorkspaceDialog) => void;
 }) {
@@ -87,20 +89,22 @@ export function WorkspaceSidebar({
       </SidebarHeader>
       <SidebarContent className="min-h-0 space-y-6 overflow-x-hidden p-2">
         <SidebarGroup>
-          {planningViews.map(({ view: target, label, icon: Icon }) => (
-            <SidebarItem
+          {planningViews.map(({ view: target, to, label, icon: Icon }) => (
+            <Link
               key={target}
-              type="button"
-              icon={<Icon />}
-              tooltip={label}
+              to={to}
+              search={{ ...search, goal: undefined, board: "all" }}
+              preload="intent"
+              activeOptions={{ exact: true, includeSearch: false }}
               aria-label={label}
-              variant={view === target ? "active" : "default"}
-              className={`workspace-sidebar-item ${view === target ? "text-accent-foreground" : ""}`}
+              title={expanded ? undefined : label}
+              className={`${sidebarItemVariants({ variant: view === target ? "active" : "default" })} workspace-sidebar-item ${view === target ? "text-accent-foreground" : "text-foreground"}`}
               aria-current={view === target ? "page" : undefined}
-              onClick={() => act(() => onNavigate(target))}
+              onClick={() => { if (isMobile) setOpenMobile(false); }}
             >
-              {label}
-            </SidebarItem>
+              <span className="pointer-events-none shrink-0" aria-hidden="true"><Icon /></span>
+              <span className={expanded ? "truncate" : "sr-only"}>{label}</span>
+            </Link>
           ))}
           <SidebarItem
             type="button"
