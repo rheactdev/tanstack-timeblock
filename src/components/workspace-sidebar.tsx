@@ -71,21 +71,18 @@ export function WorkspaceSidebar({
         <Button
           type="button"
           variant="ghost"
-          className="workspace-account-button"
-          aria-label={user ? "Your account" : "Sign in"}
-          aria-haspopup="dialog"
-          title={accountName}
-          onClick={() => showDialog("account")}
+          className="workspace-collapse-button"
+          aria-label={toggleLabel}
+          aria-expanded={isMobile ? openMobile : expanded}
+          title={toggleLabel}
+          onClick={toggleSidebar}
         >
-          <span className="workspace-account-icon" aria-hidden="true">
-            <Avatar className="shadow-none transition-colors hover:translate-x-0 hover:translate-y-0 hover:shadow-none">
-              {user?.image && <AvatarImage src={user.image} alt="" />}
-              <AvatarFallback className="text-sm">
-                {initials || <UserRound />}
-              </AvatarFallback>
-            </Avatar>
+          <span className="workspace-collapse-icon-column" aria-hidden="true">
+            <span className={buttonVariants({ variant: "secondary", size: "icon", className: "workspace-collapse-icon" })}>
+              {expanded ? <PanelLeftClose /> : <PanelLeftOpen />}
+            </span>
           </span>
-          {expanded && <span className="workspace-account-label">{accountName}</span>}
+          {expanded && <span className="workspace-collapse-label">Collapse</span>}
         </Button>
       </SidebarHeader>
       <SidebarContent className="min-h-0 space-y-6 overflow-x-hidden p-2">
@@ -121,18 +118,21 @@ export function WorkspaceSidebar({
         <Button
           type="button"
           variant="ghost"
-          className="workspace-collapse-button"
-          aria-label={toggleLabel}
-          aria-expanded={isMobile ? openMobile : expanded}
-          title={toggleLabel}
-          onClick={toggleSidebar}
+          className="workspace-account-button"
+          aria-label={user ? "Your account" : "Sign in"}
+          aria-haspopup="dialog"
+          title={accountName}
+          onClick={() => showDialog("account")}
         >
-          <span className="workspace-collapse-icon-column" aria-hidden="true">
-            <span className={buttonVariants({ variant: "secondary", size: "icon", className: "workspace-collapse-icon" })}>
-              {expanded ? <PanelLeftClose /> : <PanelLeftOpen />}
-            </span>
+          <span className="workspace-account-icon" aria-hidden="true">
+            <Avatar className="shadow-none transition-colors hover:translate-x-0 hover:translate-y-0 hover:shadow-none">
+              {user?.image && <AvatarImage src={user.image} alt="" />}
+              <AvatarFallback className="text-sm">
+                {initials || <UserRound />}
+              </AvatarFallback>
+            </Avatar>
           </span>
-          {expanded && <span className="workspace-collapse-label">Collapse</span>}
+          {expanded && <span className="workspace-account-label">{accountName}</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

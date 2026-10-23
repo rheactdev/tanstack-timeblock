@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import { ArrowLeft, ChevronLeft, ChevronRight, Columns3, ListFilter, PanelLeft, Search, Settings2, UserRound, X } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Columns3, ListFilter, PanelLeft, Search, Settings2, X } from 'lucide-react'
 import { formatDate, periodColumns, periodStart, samePeriod, scheduleKey, shiftDate, sortedTasks, todayInZone } from '../lib/calendar'
 import type { DatedHorizon, Horizon, PlannerSearch, PlannerView, Schedule, Task, WorkspaceData } from '../lib/model'
 import { filterTasks } from '../lib/model'
 import { useWorkspace } from './use-workspace'
 import { Button } from './ui/button'
 import { toast } from './ui/toast'
-import { IconButton } from './planner-controls'
 import { SidebarInset, useSidebar } from './ui/sidebar'
 import { WorkspaceSidebar } from './workspace-sidebar'
 import { HorizonColumn } from './horizon-column'
@@ -114,6 +113,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
               {cursor !== today && <Button type="button" variant="outline" size="sm" className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</Button>}
             <Button type="button" variant="outline" className="planner-topbar-search" aria-label="Search goals (Command or Control + K)" aria-haspopup="dialog" onClick={() => setDialog('search')}><Search aria-hidden="true" /><span>Search...</span><kbd aria-hidden="true"><span>⌘</span>K</kbd></Button>
             <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label="Filters" aria-haspopup="dialog" title="Filters" data-active={filtered || undefined} onClick={() => setDialog('filters')}><ListFilter aria-hidden="true" /></Button>
+            <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label="Settings" aria-haspopup="dialog" title="Settings" onClick={() => setDialog('settings')}><Settings2 aria-hidden="true" /></Button>
           </div>
         </div>
       </header>
@@ -123,7 +123,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
         {expanded.length === 0 && <div className="collapsed-empty"><Columns3 size={26} /><p>Expand a horizon to see your goals.</p><Button variant="outline" size="sm" onClick={() => void mutate({ action: 'preferences', patch: { collapsed: [] } })}>Expand all</Button></div>}
       </div>{collapsed.length > 0 && <div className="collapsed-horizons" aria-label="Collapsed horizons">{collapsed.map(schedule => <button key={schedule.horizon} className={`collapsed-horizon collapsed-${schedule.horizon}`} onClick={() => collapse(schedule.horizon)} aria-label={`Expand ${horizonLabels[schedule.horizon]}`}><span>{horizonLabels[schedule.horizon]}</span></button>)}</div>}</div>
     </main>
-    <aside className="scenery-strip grid-pattern" aria-label="Workspace controls"><div className="floating-tools"><IconButton label="Change background" className="scene-swatch" onClick={() => setDialog('appearance')}><span /></IconButton><IconButton label="Account" onClick={() => setDialog('account')}><UserRound size={22} /></IconButton><IconButton label="Filters" className={filtered ? 'filter-active' : ''} onClick={() => setDialog('filters')}><ListFilter size={22} /></IconButton><CursorPicker cursor={cursor} today={today} onSelect={date => updateSearch({ date })} label="Jump to a date" /><IconButton label="Search" onClick={() => setDialog('search')}><Search size={22} /></IconButton><IconButton label="Settings" onClick={() => setDialog('settings')}><Settings2 size={22} /></IconButton></div></aside>
+    <aside className="scenery-strip grid-pattern" aria-hidden="true" />
 
     {selected && <GoalEditor key={selected.id} task={selected} today={today} mutate={mutate} onClose={closeGoal} onDelete={task => void removeGoal(task)} />}
     {search.goal && !selected && <div className="missing-goal-notice" role="status">This goal is unavailable.<button onClick={closeGoal}>Dismiss</button></div>}
