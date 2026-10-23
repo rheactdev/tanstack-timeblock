@@ -373,17 +373,6 @@ a:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.planner-back-link {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 7px;
-  color: hsl(var(--muted-foreground));
-  font-size: 12px;
-}
-.planner-back-link:hover {
-  color: hsl(var(--foreground));
-}
 .planner-topbar-actions {
   display: flex;
   align-items: center;
@@ -1439,9 +1428,6 @@ a:focus-visible {
   }
 }
 @media (max-width: 1000px) {
-  .planner-back-link > span {
-    display: none;
-  }
   .planner-app {
     grid-template-columns: minmax(0, 1fr) 70px;
   }

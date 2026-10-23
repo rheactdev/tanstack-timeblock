@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import { ArrowLeft, ChevronLeft, ChevronRight, Columns3, ListFilter, PanelLeft, Search, Settings2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Columns3, ListFilter, PanelLeft, Search, Settings2, X } from 'lucide-react'
 import { formatDate, periodColumns, periodStart, samePeriod, scheduleKey, shiftDate, sortedTasks, todayInZone } from '../lib/calendar'
 import type { DatedHorizon, Horizon, PlannerSearch, PlannerView, Schedule, Task, WorkspaceData } from '../lib/model'
 import { filterTasks } from '../lib/model'
@@ -101,7 +101,6 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
         <div className="planner-topbar-content">
           <div className="planner-topbar-heading">
             <Button type="button" variant="secondary" size="icon" className="planner-sidebar-toggle" aria-label="Open workspace navigation" title="Open workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
-            {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
             <span className="planner-view-name">{viewLabels[view]}</span>
           </div>
           <div className="planner-topbar-actions">
