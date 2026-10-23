@@ -83,13 +83,13 @@ Use the repository’s `compose.coolify.yaml` for production. The existing `comp
 
    | Variable | Value |
    | --- | --- |
-   | `BETTER_AUTH_URL` | Required: public origin, such as `https://planner.example.com`. |
+   | `BETTER_AUTH_URL` | Optional override; defaults to Coolify's generated `SERVICE_URL_APP_3000`. |
    | `BETTER_AUTH_SECRET` | Required: a persistent random secret of at least 32 characters. |
    | `COUCHDB_PASSWORD` | Required: the database administrator password. |
    | `COUCHDB_USER` | Optional; defaults to `timestripe`. |
    | `COUCHDB_DATABASE` | Optional; defaults to `timestripe`. |
 
-4. Under Domains, assign your domain to the **app** service with internal port **3000**, for example `https://planner.example.com:3000`. `BETTER_AUTH_URL` uses the public origin without that internal-port suffix. Coolify handles the proxy and HTTPS configuration through its normal Compose deployment flow.
+4. Under Domains, assign your domain to the **app** service with internal port **3000**, for example `https://planner.example.com:3000`. Coolify manages `SERVICE_URL_APP_3000` from that configuration; the Compose file passes its public URL to `BETTER_AUTH_URL` automatically. The `3000` in the generated variable's name selects the internal proxy port; the public URL still uses normal HTTP/HTTPS ports. If you already entered a literal `BETTER_AUTH_URL`, clear that override or set it to `$SERVICE_URL_APP_3000` with interpolation enabled. A manual override should be your public origin, such as `https://planner.example.com`, with no internal-port suffix or `/api/auth` path.
 5. Deploy, then review the application and CouchDB logs and health status.
 
 These steps follow [Coolify’s Docker Compose deployment documentation](https://coolify.io/docs/applications/builds/docker-compose). The Compose file publishes no host ports. CouchDB uses service-to-service networking at `http://couchdb:5984` and has no public domain. Set secrets in Coolify; no local `.env` file is loaded into the images or mounted at runtime.

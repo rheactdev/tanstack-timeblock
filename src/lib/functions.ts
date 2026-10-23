@@ -5,6 +5,10 @@ export const getWorkspace = createServerFn({ method: 'GET' }).handler(async () =
   const { loadWorkspace } = await import('../server/workspace.server')
   return loadWorkspace()
 })
+export const getSidebarOpen = createServerFn({ method: 'GET' }).handler(async () => {
+  const { loadSidebarOpen } = await import('../server/sidebar.server')
+  return loadSidebarOpen()
+})
 export const changeWorkspace = createServerFn({ method: 'POST' })
   .validator(mutationSchema)
   .handler(async ({ data }) => {

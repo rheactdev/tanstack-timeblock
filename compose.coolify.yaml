@@ -16,7 +16,8 @@ services:
       PORT: "3000"
       NITRO_HOST: 0.0.0.0
       NITRO_PORT: "3000"
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set BETTER_AUTH_URL to your public HTTPS origin}
+      SERVICE_URL_APP_3000: /
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-${SERVICE_URL_APP_3000}}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set a persistent random BETTER_AUTH_SECRET of at least 32 characters}
       COUCHDB_URL: http://couchdb:5984
       COUCHDB_DATABASE: ${COUCHDB_DATABASE:-timestripe}

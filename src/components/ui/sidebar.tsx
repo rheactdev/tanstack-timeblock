@@ -4,15 +4,28 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { PanelLeft } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { parseSidebarState, SIDEBAR_COOKIE_MAX_AGE, SIDEBAR_STATE_KEY } from '../../lib/sidebar-state'
 import { Button } from './button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from './sheet'
 
-const SIDEBAR_COOKIE_NAME = 'sidebar:state'
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 const SIDEBAR_WIDTH = '16rem'
 const SIDEBAR_WIDTH_COLLAPSED = '4rem'
 const SIDEBAR_WIDTH_MOBILE = '18rem'
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
+
+function saveSidebarOpen(open: boolean) {
+  try {
+    window.localStorage.setItem(SIDEBAR_STATE_KEY, String(open))
+  } catch {
+    // The cookie still works when local storage is unavailable.
+  }
+  try {
+    const secure = window.location.protocol === 'https:' ? '; secure' : ''
+    document.cookie = `${SIDEBAR_STATE_KEY}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; samesite=lax${secure}`
+  } catch {
+    // Keep the in-memory state usable when browser storage is blocked.
+  }
+}
 
 // Context
 interface SidebarContextValue {
@@ -62,6 +75,20 @@ const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderProps>(
     const isControlled = controlledOpen !== undefined
     const open = isControlled ? controlledOpen : uncontrolledOpen
 
+    React.useEffect(() => {
+      if (isControlled) return
+      let savedOpen: boolean | undefined
+      try {
+        savedOpen = parseSidebarState(window.localStorage.getItem(SIDEBAR_STATE_KEY))
+      } catch {
+        // Fall back to the cookie-backed server default.
+      }
+      const restoredOpen = savedOpen ?? defaultOpen
+      setUncontrolledOpen(restoredOpen)
+      // Mirror the preference into a cookie so SSR uses it on the next visit.
+      saveSidebarOpen(restoredOpen)
+    }, [defaultOpen, isControlled])
+
     const setOpen = React.useCallback(
       (value: boolean) => {
         if (!isControlled) {
@@ -69,12 +96,7 @@ const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderProps>(
         }
         onOpenChange?.(value)
 
-        // Save to cookie
-        try {
-          document.cookie = `${SIDEBAR_COOKIE_NAME}=${value}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
-        } catch {
-          // Silent fail — cookie storage unavailable (private browsing, etc.)
-        }
+        saveSidebarOpen(value)
       },
       [isControlled, onOpenChange]
     )
