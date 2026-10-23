@@ -29,12 +29,15 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   const [position, setPosition] = useState<Task | null>(null)
   const [dragging, setDragging] = useState<string | null>(null)
   const [today, setToday] = useState(data.today)
+  const [lifeFocusRequest, setLifeFocusRequest] = useState(0)
+  const lifeFocusPending = useRef(false)
   const scroll = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const router = useRouter()
   const cursor = search.date || today
   const visibleTasks = filterTasks(data.tasks, search)
   const combined = view === 'horizons'
+  const lifeCollapsed = data.preferences.collapsed.includes('life')
   const allColumns = periodColumns(view, cursor)
   const expanded = allColumns.filter(schedule => !combined || !data.preferences.collapsed.includes(schedule.horizon))
   const collapsed = combined ? allColumns.filter(schedule => data.preferences.collapsed.includes(schedule.horizon)) : []
@@ -56,6 +59,10 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   }, [])
   useEffect(() => {
     if (!scroll.current) return
+    if (lifeFocusPending.current) {
+      if (combined) return
+      lifeFocusPending.current = false
+    }
     if (combined) { scroll.current.scrollTo({ left: 0 }); return }
     const activeHorizon = view === 'days' ? 'day' : view === 'weeks' ? 'week' : view === 'months' ? 'month' : view === 'years' ? 'year' : 'inbox'
     const active = { horizon: activeHorizon as Horizon, date: periodStart(cursor, activeHorizon) }
@@ -64,6 +71,14 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
     const element = scroll.current.querySelectorAll<HTMLElement>('.horizon-column')[index]
     if (element) scroll.current.scrollTo({ left: element.offsetLeft - scroll.current.offsetLeft })
   }, [view, cursor])
+  useEffect(() => {
+    if (!lifeFocusPending.current || !combined || lifeCollapsed) return
+    const container = scroll.current
+    const lifeColumn = container?.querySelector<HTMLElement>('.horizon-life')
+    if (!container || !lifeColumn) return
+    lifeFocusPending.current = false
+    container.scrollTo({ left: lifeColumn.offsetLeft - container.offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  }, [combined, lifeCollapsed, lifeFocusRequest])
 
   function updateSearch(patch: Partial<PlannerSearch>, replace = false) {
     const next = { ...search, ...patch }
@@ -73,8 +88,14 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
     void navigate({ to: viewPaths[target], search: { ...search, goal: undefined, board: 'all', ...patch } })
   }
   function focus(schedule: Schedule) {
+    if (schedule.horizon === 'life') { openLife(); return }
     go(focusViews[schedule.horizon] || 'horizons', { date: schedule.date || search.date })
-    if (schedule.horizon === 'life' && data.preferences.collapsed.includes('life')) collapse('life')
+  }
+  function openLife() {
+    lifeFocusPending.current = true
+    setLifeFocusRequest(request => request + 1)
+    if (lifeCollapsed) void mutate({ action: 'preferences', patch: { collapsed: data.preferences.collapsed.filter(horizon => horizon !== 'life') } })
+    go('horizons')
   }
   function collapse(horizon: Horizon) {
     const current = data.preferences.collapsed
@@ -94,7 +115,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   const nextDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, 1) : cursor
 
   return <>
-    <WorkspaceSidebar user={data.user} view={view} search={search} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
+    <WorkspaceSidebar user={data.user} view={view} search={search} onLife={openLife} onDialog={setDialog} />
     <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
       <header className="planner-topbar">

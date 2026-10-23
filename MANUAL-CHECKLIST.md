@@ -8,6 +8,16 @@ Verification is left to you. No tests, builds, type checks, or application brows
 - [ ] Run `npm run dev`. Visit `/horizons`.
 - [ ] Optionally run `npm run typecheck` and `npm run build` yourself.
 
+## Coolify deployment
+
+- [ ] Use the Git-based Docker Compose build strategy with `compose.coolify.yaml`. Set `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, and `COUCHDB_PASSWORD` in Coolify. Confirm the secret is at least 32 characters and the public auth URL uses your HTTPS origin.
+- [ ] Assign only the app service a domain routed to internal port 3000. Confirm CouchDB has no public domain or published host port. Neither service should need repository bind mounts.
+- [ ] Deploy and confirm CouchDB becomes healthy before the app starts. App logs should report database/index initialization before Nitro starts listening on port 3000. Both services should become healthy.
+- [ ] Request `/api/health` yourself and confirm an OK response. Repeated health requests should not create visitor workspace documents or auth cookies.
+- [ ] Sign up, sign in, sign out, create goals, and reload using the public HTTPS domain. Confirm auth works behind Coolify’s proxy and account isolation is retained.
+- [ ] Redeploy and restart the services. Goals and accounts should persist, the initializer should accept the existing database/index, and the signing secret and credentials should remain unchanged.
+- [ ] Confirm the existing local `compose.yaml` and `.env` still work independently. Existing local data should remain untouched; copy it to Coolify separately if required.
+
 ## Layout and BoldKit
 
 - [ ] The Horizons view label uses 18px text. Column headings such as Inbox, Week, Year, and Life remain 22px, sharing its weight, line height, and letter spacing across screen widths and dedicated period views. On desktop Horizons, the view label and first column title share the same left edge; goal rows retain their alignment with the column titles.
@@ -20,6 +30,7 @@ Verification is left to you. No tests, builds, type checks, or application brows
 - [ ] The sidebar footer shows a clickable BoldKit avatar in both expanded and collapsed modes. The avatar opens the account dialog and shows the account image or initials, with a guest icon before sign-in. Its border keeps BoldKit’s default foreground color during successful, pending, and failed saves. The avatar has no drop shadow, stays centered in the collapsed footer, and stays still on hover.
 - [ ] The sidebar has no sync check, spinner, or sync status text. Save failures still show an error notification and restore the last confirmed workspace state.
 - [ ] Expand and collapse the sidebar, including with ⌘B/Ctrl+B. Check Inbox, Horizons, Days, Weeks, Months, Years, and Life navigation. On mobile, open the sidebar drawer and select a destination.
+- [ ] From Inbox and each period view, select Life goals. Horizons should open, expand Life if necessary, and scroll horizontally to its column without snapping back to Inbox. Repeat while already on Horizons, with Life collapsed and expanded, using both sidebar states and mobile. Repeated clicks should still focus Life, its expanded state should persist after reload, and reduced-motion preferences should skip smooth scrolling.
 - [ ] Collapse the sidebar and navigate between planning views. It should remain collapsed. Expand it and navigate again; it should remain expanded.
 - [ ] In collapsed mode, click rapidly between Horizons, Inbox, Days, Weeks, Months, and Years, then use browser Back and Forward. Only the active highlight should change, without color fading, icon replacement, or sidebar width changes. Links retain the selected date and filters, close the selected goal, preload on intent, and support opening in a new tab.
 - [ ] Toggle the sidebar repeatedly. Its width should animate, while the avatar, navigation icons, and spacing above the first item stay fixed; labels should be clipped within the sidebar as it opens.

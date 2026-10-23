@@ -73,6 +73,35 @@ Provide `COUCHDB_URL`, `COUCHDB_DATABASE`, `COUCHDB_USER`, `COUCHDB_PASSWORD`, `
 
 Nitro’s `node-server` preset emits `.output/server/index.mjs` and `.output/public`. The included Dockerfile packages that output. To target another supported runtime, change the Nitro preset and supply its environment bindings; routes, loaders, and server functions keep the same application model. Preserve streaming responses through any reverse proxy.
 
+## Deploy with Coolify
+
+Use the repository’s `compose.coolify.yaml` for production. The existing `compose.yaml` remains the local CouchDB-only stack.
+
+1. Create a Git-based application in Coolify and select the **Docker Compose** build strategy.
+2. Set Base Directory to the repository root and Docker Compose Location to `compose.coolify.yaml`. Save and load the definition.
+3. Set these runtime variables in Coolify:
+
+   | Variable | Value |
+   | --- | --- |
+   | `BETTER_AUTH_URL` | Required: public origin, such as `https://planner.example.com`. |
+   | `BETTER_AUTH_SECRET` | Required: a persistent random secret of at least 32 characters. |
+   | `COUCHDB_PASSWORD` | Required: the database administrator password. |
+   | `COUCHDB_USER` | Optional; defaults to `timestripe`. |
+   | `COUCHDB_DATABASE` | Optional; defaults to `timestripe`. |
+
+4. Under Domains, assign your domain to the **app** service with internal port **3000**, for example `https://planner.example.com:3000`. `BETTER_AUTH_URL` uses the public origin without that internal-port suffix. Coolify handles the proxy and HTTPS configuration through its normal Compose deployment flow.
+5. Deploy, then review the application and CouchDB logs and health status.
+
+These steps follow [Coolify’s Docker Compose deployment documentation](https://coolify.io/docs/applications/builds/docker-compose). The Compose file publishes no host ports. CouchDB uses service-to-service networking at `http://couchdb:5984` and has no public domain. Set secrets in Coolify; no local `.env` file is loaded into the images or mounted at runtime.
+
+Both services build from this repository. The Node 24 application image retains Nitro’s `node-server` output. The CouchDB image includes `couchdb/single-node.ini`, so deployment does not depend on repository bind mounts or the Preserve repository option. CouchDB data persists in the named `couchdb-data` volume managed by the Compose resource.
+
+The app waits for CouchDB’s authenticated health check, then runs `scripts/init-couchdb.mjs` before starting Nitro. This initializer creates the application database only when absent and ensures the `kind` index exists; it does not reset documents. It is safe to run again on container restart. The app’s `/api/health` endpoint reports HTTP process readiness without creating guest workspaces; CouchDB has its own database health check.
+
+Keep the same signing secret, database credentials, database name, and persistent volume across redeployments. This stack creates a separate database on the Coolify server; existing local CouchDB data is not transferred automatically. Use CouchDB replication or your backup/restore process if you want to move that data.
+
+Deployment has not been run or validated here. The manual deployment checks are in [MANUAL-CHECKLIST.md](MANUAL-CHECKLIST.md).
+
 No tests, builds, type checks, or application browser checks were run for this rebuild, at the user’s request. Use [MANUAL-CHECKLIST.md](MANUAL-CHECKLIST.md) for the verification handoff. TanStack’s generated route tree is refreshed as implementation code generation; Vite also maintains it during development.
 
 BoldKit React primitives and theme styles are vendored from its [official registry](https://github.com/ANIBIT14/boldkit/tree/main/registry/default) under the included [MIT license](BOLDKIT-LICENSE). Tailwind CSS v4 is integrated through its Vite plugin. Outfit Variable is bundled locally through Fontsource. Mountain photography: [Unsplash image](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b).
