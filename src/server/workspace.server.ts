@@ -18,7 +18,7 @@ export function identity() {
 }
 async function resolveIdentity() {
   const session = await getAuth().api.getSession({ headers: getRequestHeaders() })
-  if (session) return { owner: `user:${session.user.id}`, user: { name: session.user.name, email: session.user.email } }
+  if (session) return { owner: `user:${session.user.id}`, user: { name: session.user.name, email: session.user.email, image: session.user.image } }
   const cookie = getCookie('timestripe-visitor')
   let id: string | undefined
   if (cookie) {

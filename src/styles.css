@@ -260,21 +260,28 @@ a:focus-visible {
   width: 20px;
   height: 20px;
 }
-.workspace-sync {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 8px 2px;
-  font-size: 11px;
-  color: hsl(var(--muted-foreground));
+.workspace-account-button {
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  gap: 12px;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
 }
-.workspace-sync-collapsed {
+.workspace-account-button:hover {
+  background: transparent;
+}
+.workspace-account-button[data-collapsed="true"] {
   justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
 }
-.workspace-sync > svg {
-  color: hsl(var(--secondary));
+.workspace-account-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .workspace-stats {
   font-size: 10px;

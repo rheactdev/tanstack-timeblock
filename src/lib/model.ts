@@ -28,7 +28,7 @@ export type Board = { id: string; name: string; color: string }
 export type Preferences = { collapsed: Horizon[]; sorts: Record<string, SortMode>; scene: 'alpine' | 'forest' | 'rose' }
 export type Workspace = { schemaVersion: 2; tasks: Task[]; boards: Board[]; preferences: Preferences }
 export type WorkspaceData = Workspace & {
-  user: { name: string; email: string } | null; storage: 'couchdb' | 'local'; today: string; now: string; timezone: string
+  user: { name: string; email: string; image?: string | null } | null; storage: 'couchdb' | 'local'; today: string; now: string; timezone: string
 }
 export const searchSchema = z.object({
   date: dateSchema.optional().catch(undefined), q: z.string().max(200).catch(''),

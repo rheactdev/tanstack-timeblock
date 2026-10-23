@@ -5,11 +5,13 @@ import type { Mutation, Workspace, WorkspaceData } from '../lib/model'
 import { toast } from './ui/toast'
 
 export type Mutate = (mutation: Mutation) => Promise<Workspace | null>
+export type SyncStatus = 'synced' | 'syncing' | 'error'
 type Pending = { token: number; mutation: Mutation; now: string }
 
 export function useWorkspace(initial: WorkspaceData) {
   const [data, setData] = useState(initial)
-  const [saving, setSaving] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('synced')
+  const lastSaveFailed = useRef(false)
   const confirmed = useRef(initial)
   const queue = useRef(Promise.resolve())
   const pending = useRef<Pending[]>([])
@@ -24,7 +26,7 @@ export function useWorkspace(initial: WorkspaceData) {
       try { projected = applyMutation(projected, operation.mutation, operation.now, () => '') } catch { /* A prior operation may have removed this goal. The server resolves it. */ }
     }
     setData({ ...confirmed.current, ...projected })
-    setSaving(pending.current.length > 0)
+    setSyncStatus(pending.current.length > 0 ? 'syncing' : lastSaveFailed.current ? 'error' : 'synced')
   }
   const mutate: Mutate = mutation => {
     const operation = { token: ++counter.current, mutation, now: new Date().toISOString() }
@@ -37,7 +39,9 @@ export function useWorkspace(initial: WorkspaceData) {
       try {
         result = await changeWorkspace({ data: mutation })
         confirmed.current = { ...confirmed.current, ...result }
+        lastSaveFailed.current = false
       } catch (error) {
+        lastSaveFailed.current = true
         toast.error('Changes were not saved', { description: error instanceof Error ? error.message : 'Please try again. Your previous data has been restored.' })
       } finally {
         pending.current = pending.current.filter(item => item.token !== operation.token)
@@ -47,5 +51,5 @@ export function useWorkspace(initial: WorkspaceData) {
     })
     return promise
   }
-  return { data, saving, mutate }
+  return { data, saving: syncStatus === 'syncing', syncStatus, mutate }
 }

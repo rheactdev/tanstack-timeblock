@@ -4,15 +4,15 @@ import {
   Calendar,
   CalendarDays,
   CalendarRange,
-  Check,
   Columns3,
   Flag,
   Inbox,
-  LoaderCircle,
   Mountain,
   UserRound,
 } from "lucide-react";
 import type { PlannerView, WorkspaceData } from "../lib/model";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +37,6 @@ const planningViews = [
 export function WorkspaceSidebar({
   user,
   view,
-  saving,
   progress,
   completed,
   total,
@@ -47,7 +46,6 @@ export function WorkspaceSidebar({
 }: {
   user: WorkspaceData["user"];
   view: PlannerView;
-  saving: boolean;
   progress: Promise<{ completed: number; total: number }>;
   completed: number;
   total: number;
@@ -57,6 +55,8 @@ export function WorkspaceSidebar({
 }) {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const expanded = isMobile || state === "expanded";
+  const accountName = user?.name || user?.email || "Sign in";
+  const initials = user?.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("") || user?.email.slice(0, 2);
 
   function act(action: () => void) {
     setOpenMobile(false);
@@ -73,7 +73,7 @@ export function WorkspaceSidebar({
       role="navigation"
       aria-label="Workspace tools"
     >
-      <SidebarHeader className="shrink-0">
+      <SidebarHeader className="h-[59px] shrink-0 px-4 py-0 group-data-[state=collapsed]/sidebar:px-2">
         <span className="min-w-0 truncate font-bold" aria-label="Horizons">
           {expanded ? "Horizons" : "H"}
         </span>
@@ -108,29 +108,6 @@ export function WorkspaceSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="shrink-0 flex-col items-stretch group-data-[state=collapsed]/sidebar:p-2">
-        <SidebarItem
-          type="button"
-          icon={<UserRound />}
-          tooltip="Your account"
-          aria-label="Your account"
-          onClick={() => showDialog("account")}
-        >
-          {user?.name || "Sign in"}
-        </SidebarItem>
-        <div
-          className={`workspace-sync ${expanded ? "" : "workspace-sync-collapsed"}`}
-          role="status"
-          aria-label={saving ? "Saving changes" : "All changes saved"}
-        >
-          {saving ? (
-            <LoaderCircle size={14} className="spin" />
-          ) : (
-            <Check size={14} />
-          )}
-          {expanded && (
-            <span>{saving ? "Saving..." : "All changes saved"}</span>
-          )}
-        </div>
         <Suspense
           fallback={
             <span className={expanded ? "workspace-stats" : "sr-only"}>
@@ -146,6 +123,24 @@ export function WorkspaceSidebar({
             )}
           </Await>
         </Suspense>
+        <Button
+          type="button"
+          variant="ghost"
+          className="workspace-account-button"
+          data-collapsed={!expanded}
+          aria-label={user ? "Your account" : "Sign in"}
+          aria-haspopup="dialog"
+          title={accountName}
+          onClick={() => showDialog("account")}
+        >
+          <Avatar className="shadow-none transition-colors hover:translate-x-0 hover:translate-y-0 hover:shadow-none" aria-hidden="true">
+            {user?.image && <AvatarImage src={user.image} alt="" />}
+            <AvatarFallback className="text-sm">
+              {initials || <UserRound aria-hidden="true" />}
+            </AvatarFallback>
+          </Avatar>
+          {expanded && <span className="workspace-account-label">{accountName}</span>}
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
