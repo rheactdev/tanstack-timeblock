@@ -242,6 +242,7 @@ a:focus-visible {
 }
 .planner-app {
   --scene-color: #77549f;
+  --planner-content-inset: 18px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 168px;
   min-width: 0;
@@ -351,7 +352,7 @@ a:focus-visible {
   gap: 12px;
   width: 100%;
   height: 56px;
-  padding: 0 12px;
+  padding: 0 var(--planner-content-inset);
 }
 .planner-topbar-heading {
   display: flex;
@@ -359,15 +360,18 @@ a:focus-visible {
   gap: 12px;
   min-width: 0;
 }
+.planner-view-name,
+.column-heading h1 {
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
 .planner-view-name {
+  font-size: 16px;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 750;
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: 0.6px;
 }
 .planner-back-link {
   display: flex;
@@ -525,12 +529,12 @@ a:focus-visible {
   flex: 1 0 280px;
 }
 .column-header {
-  padding: 24px 18px 22px;
+  padding: 15px var(--planner-content-inset);
   display: flex;
   align-items: center;
   position: relative;
   gap: 10px;
-  min-height: 99px;
+  min-height: 56px;
   flex-shrink: 0;
 }
 .column-heading {
@@ -539,20 +543,12 @@ a:focus-visible {
 }
 .column-heading h1 {
   margin: 0;
-  font-size: 32px;
-  font-weight: 750;
-  line-height: 1.2;
-  letter-spacing: -0.7px;
+  font-size: 22px;
   color: hsl(var(--foreground));
   overflow-wrap: break-word;
 }
 .column-heading:hover h1 {
   color: hsl(var(--accent));
-}
-.dedicated-column.horizon-day .column-heading h1,
-.dedicated-column.horizon-week .column-heading h1 {
-  font-size: 25px;
-  letter-spacing: -0.5px;
 }
 .column-header-tools {
   display: flex;
@@ -581,7 +577,7 @@ a:focus-visible {
   min-height: 0;
   flex: 1;
   overflow-y: auto;
-  padding: 2px 18px 24px;
+  padding: 2px var(--planner-content-inset) 24px;
 }
 .goals-list {
   display: flex;
@@ -1388,18 +1384,8 @@ a:focus-visible {
 
 @media (min-width: 1750px) {
   .planner-app {
+    --planner-content-inset: 25px;
     grid-template-columns: minmax(0, 1fr) 200px;
-  }
-  .column-header {
-    padding: 27px 23px 30px;
-    min-height: 115px;
-  }
-  .column-heading h1 {
-    font-size: 36px;
-  }
-  .column-scroll {
-    padding-left: 23px;
-    padding-right: 23px;
   }
   .goal-title,
   .add-goal-input {
@@ -1463,12 +1449,6 @@ a:focus-visible {
     flex-basis: 260px;
   }
 }
-@media (min-width: 1024px) {
-  .planner-topbar-content {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-}
 @media (max-width: 1100px) {
   .planner-calendar-navigation .period-date-button {
     width: 32px;
@@ -1494,6 +1474,7 @@ a:focus-visible {
     min-height: 480px;
   }
   .planner-app {
+    --planner-content-inset: 17px;
     grid-template-columns: minmax(0, 1fr);
   }
   .scenery-strip {
@@ -1505,17 +1486,6 @@ a:focus-visible {
   .horizon-column.dedicated-column {
     flex: 1 0 270px;
     min-width: 235px;
-  }
-  .column-header {
-    padding: 25px 17px 20px;
-    min-height: 96px;
-  }
-  .column-heading h1 {
-    font-size: 30px;
-  }
-  .column-scroll {
-    padding-left: 17px;
-    padding-right: 17px;
   }
   .goal-title,
   .add-goal-input {
