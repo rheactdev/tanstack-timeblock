@@ -101,7 +101,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
       <header className="planner-topbar">
         <div className="planner-topbar-content">
           <div className="planner-topbar-heading">
-            <Button type="button" variant="secondary" size="icon" className="planner-sidebar-toggle" aria-label="Toggle workspace navigation" title="Toggle workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
+            <Button type="button" variant="secondary" size="icon" className="planner-sidebar-toggle" aria-label="Open workspace navigation" title="Open workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
             {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
             <span className="planner-view-name">{viewLabels[view]}</span>
           </div>

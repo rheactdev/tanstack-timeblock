@@ -6,14 +6,17 @@ import {
   Flag,
   Inbox,
   Mountain,
+  PanelLeftClose,
+  PanelLeftOpen,
   UserRound,
 } from "lucide-react";
 import type { PlannerView, WorkspaceData } from "../lib/model";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarItem,
@@ -43,8 +46,9 @@ export function WorkspaceSidebar({
   onLife: () => void;
   onDialog: (dialog: WorkspaceDialog) => void;
 }) {
-  const { state, isMobile, setOpenMobile } = useSidebar();
+  const { state, isMobile, openMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const expanded = isMobile || state === "expanded";
+  const toggleLabel = isMobile ? "Close workspace navigation" : expanded ? "Collapse workspace navigation" : "Expand workspace navigation";
   const accountName = user?.name || user?.email || "Sign in";
   const initials = user?.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("") || user?.email.slice(0, 2);
 
@@ -113,6 +117,24 @@ export function WorkspaceSidebar({
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="h-[59px] shrink-0 px-2 py-0">
+        <Button
+          type="button"
+          variant="ghost"
+          className="workspace-collapse-button"
+          aria-label={toggleLabel}
+          aria-expanded={isMobile ? openMobile : expanded}
+          title={toggleLabel}
+          onClick={toggleSidebar}
+        >
+          <span className="workspace-collapse-icon-column" aria-hidden="true">
+            <span className={buttonVariants({ variant: "secondary", size: "icon", className: "workspace-collapse-icon" })}>
+              {expanded ? <PanelLeftClose /> : <PanelLeftOpen />}
+            </span>
+          </span>
+          {expanded && <span className="workspace-collapse-label">Collapse</span>}
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
