@@ -16,6 +16,7 @@ Verification is left to you. No tests, builds, type checks, or application brows
 - [ ] The five-color strip spans the entire app above the sidebar, planner, and scenic strip. The sidebar and planner header borders should align beneath it.
 - [ ] Expand and collapse the sidebar, including with ⌘B/Ctrl+B. Check Inbox, Horizons, Days, Weeks, Months, Years, and Life navigation. On mobile, open the sidebar drawer and select a destination.
 - [ ] Collapse the sidebar and navigate between planning views. It should remain collapsed. Expand it and navigate again; it should remain expanded.
+- [ ] Switch between Horizons, Days, Weeks, Months, and Years with a selected date. The toolbar date picker should stay mounted without flashing or resetting its date. Today should appear only when the selected date differs from today.
 - [ ] Hover each sidebar item, including along its edges. Only its background should change; labels should not flicker or intercept the pointer. The sidebar starts expanded, and Account opens its dialog directly without a popover.
 - [ ] In collapsed mode, hover an item long enough to see its native browser label. Sidebar items should not open animated tooltip portals. Toggle the sidebar from the main content toolbar; its button should stay under the pointer on hover.
 - [ ] Confirm dark BoldKit surfaces, Outfit typography, square bordered controls, hard shadows, and coral/teal/yellow accents. There should be no dashboard hero, motivational quote panel, numbered columns, or invented category badges.
@@ -28,6 +29,7 @@ Verification is left to you. No tests, builds, type checks, or application brows
 - [ ] Create goals on two adjacent dates; each should appear only in its own Day column. A day goal must not also appear as a weekly/monthly/yearly goal.
 - [ ] Confirm Days shows seven Monday–Sunday dates, Weeks six consecutive Monday-start weeks, Months twelve months, and Years ten years.
 - [ ] Choose a month or year using the date picker. Related horizon columns should follow the shared calendar cursor.
+- [ ] In Days, Weeks, Months, and Years, use the left and right buttons beside the date picker. Each click should move the cursor by one day, week, month, or year respectively while retaining filters and sidebar state. Today returns to the current date; on mobile it is available inside the date picker.
 - [ ] Choose a date near New Year, a month end, leap day, and a daylight-saving transition. Confirm labels, week starts, and rescheduling remain date-correct. Today returns to the current New York date.
 - [ ] Leave an incomplete goal on an earlier date; it should remain there rather than move automatically.
 - [ ] Open a dated URL directly, reload it, and confirm the selected calendar period and filters are retained. Open a legacy `/?view=day` URL and confirm it redirects to Days.

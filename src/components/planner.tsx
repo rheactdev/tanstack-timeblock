@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import { ArrowLeft, Columns3, ListFilter, Search, Settings2, UserRound, X } from 'lucide-react'
-import { formatDate, periodColumns, periodStart, samePeriod, scheduleKey, sortedTasks, todayInZone } from '../lib/calendar'
-import type { Horizon, PlannerSearch, PlannerView, Schedule, Task, WorkspaceData } from '../lib/model'
+import { ArrowLeft, ChevronLeft, ChevronRight, Columns3, ListFilter, PanelLeft, Search, Settings2, UserRound, X } from 'lucide-react'
+import { formatDate, periodColumns, periodStart, samePeriod, scheduleKey, shiftDate, sortedTasks, todayInZone } from '../lib/calendar'
+import type { DatedHorizon, Horizon, PlannerSearch, PlannerView, Schedule, Task, WorkspaceData } from '../lib/model'
 import { filterTasks } from '../lib/model'
 import { useWorkspace } from './use-workspace'
 import { Button } from './ui/button'
 import { toast } from './ui/toast'
 import { IconButton } from './planner-controls'
-import { SidebarInset, SidebarToggle } from './ui/sidebar'
+import { SidebarInset, useSidebar } from './ui/sidebar'
 import { WorkspaceSidebar } from './workspace-sidebar'
 import { HorizonColumn } from './horizon-column'
 import { GoalEditor, PositionDialog } from './goal-editor'
@@ -20,8 +20,10 @@ const viewPaths = { horizons: '/horizons', inbox: '/inbox', days: '/days', weeks
 type NavigationView = keyof typeof viewPaths
 const viewLabels: Record<PlannerView, string> = { horizons: 'Horizons', inbox: 'Inbox', days: 'Days', weeks: 'Weeks', months: 'Months', years: 'Years' }
 const focusViews: Partial<Record<Horizon, NavigationView>> = { inbox: 'inbox', day: 'days', week: 'weeks', month: 'months', year: 'years', life: 'horizons' }
+const navigationHorizons: Partial<Record<PlannerView, DatedHorizon>> = { days: 'day', weeks: 'week', months: 'month', years: 'year' }
 
 export function Planner({ initial, progress, search, view }: { initial: WorkspaceData; progress: Promise<{ completed: number; total: number }>; search: PlannerSearch; view: PlannerView }) {
+  const { toggleSidebar, open, openMobile, isMobile } = useSidebar()
   const { data, saving, mutate } = useWorkspace(initial)
   const [dialog, setDialog] = useState<Dialog>(null)
   const [reschedule, setReschedule] = useState<Task | null>(null)
@@ -88,6 +90,9 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
     toast({ title: 'Goal deleted', duration: 8000, action: { label: 'Undo', onClick: () => { void mutate({ action: 'restore', id: task.id }) } } })
   }
   const cursorLabel = formatDate(cursor, { month: 'short', day: 'numeric', year: 'numeric' })
+  const navigationHorizon = navigationHorizons[view]
+  const previousDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, -1) : cursor
+  const nextDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, 1) : cursor
 
   return <>
     <WorkspaceSidebar user={data.user} view={view} saving={saving} progress={progress} completed={data.tasks.filter(task => task.completed && !task.deletedAt).length} total={data.tasks.filter(task => !task.deletedAt).length} onNavigate={go} onLife={() => { go('horizons'); if (data.preferences.collapsed.includes('life')) collapse('life'); scroll.current?.scrollTo({ left: scroll.current.scrollWidth, behavior: 'smooth' }) }} onDialog={setDialog} />
@@ -96,12 +101,17 @@ export function Planner({ initial, progress, search, view }: { initial: Workspac
       <header className="planner-topbar">
         <div className="planner-topbar-content">
           <div className="planner-topbar-heading">
-            <SidebarToggle className="planner-topbar-control" aria-label="Toggle workspace navigation" />
+            <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label="Toggle workspace navigation" title="Toggle workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
             {!combined && <button type="button" className="planner-back-link" aria-label="Back to Horizons" onClick={() => go('horizons')}><ArrowLeft size={15} /><span>Horizons</span></button>}
             <span className="planner-view-name">{viewLabels[view]}</span>
           </div>
           <div className="planner-topbar-actions">
-            {!combined && <><CursorPicker cursor={cursor} today={today} label={cursorLabel} onSelect={date => updateSearch({ date })} /><Button type="button" variant="outline" size="sm" className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</Button></>}
+              <div className={`planner-calendar-navigation ${navigationHorizon ? 'planner-period-navigation' : ''}`} role="group" aria-label={navigationHorizon ? `${horizonLabels[navigationHorizon]} navigation` : 'Calendar navigation'}>
+                {navigationHorizon && <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label={`Previous ${navigationHorizon}`} title={`Previous ${navigationHorizon}`} disabled={previousDate === cursor} onClick={() => updateSearch({ date: previousDate })}><ChevronLeft aria-hidden="true" /></Button>}
+                <CursorPicker cursor={cursor} today={today} label={cursorLabel} onSelect={date => updateSearch({ date })} />
+                {navigationHorizon && <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label={`Next ${navigationHorizon}`} title={`Next ${navigationHorizon}`} disabled={nextDate === cursor} onClick={() => updateSearch({ date: nextDate })}><ChevronRight aria-hidden="true" /></Button>}
+              </div>
+              {cursor !== today && <Button type="button" variant="outline" size="sm" className="return-today" onClick={() => updateSearch({ date: undefined })}>Today</Button>}
             <Button type="button" variant="outline" className="planner-topbar-search" aria-label="Search goals (Command or Control + K)" aria-haspopup="dialog" onClick={() => setDialog('search')}><Search aria-hidden="true" /><span>Search...</span><kbd aria-hidden="true"><span>⌘</span>K</kbd></Button>
             <Button type="button" variant="outline" size="icon" className="planner-topbar-control" aria-label="Filters" aria-haspopup="dialog" title="Filters" data-active={filtered || undefined} onClick={() => setDialog('filters')}><ListFilter aria-hidden="true" /></Button>
           </div>

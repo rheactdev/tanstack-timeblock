@@ -5,16 +5,11 @@ import {
   CalendarDays,
   CalendarRange,
   Check,
-  CircleHelp,
   Columns3,
   Flag,
   Inbox,
-  ListFilter,
   LoaderCircle,
   Mountain,
-  Search,
-  Settings2,
-  Trash2,
   UserRound,
 } from "lucide-react";
 import type { PlannerView, WorkspaceData } from "../lib/model";
@@ -26,18 +21,10 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarItem,
-  SidebarSeparator,
   useSidebar,
 } from "./ui/sidebar";
 
-type WorkspaceDialog =
-  | "account"
-  | "appearance"
-  | "deleted"
-  | "filters"
-  | "help"
-  | "search"
-  | "settings";
+type WorkspaceDialog = "account";
 const planningViews = [
   { view: "horizons", label: "Horizons", icon: Columns3 },
   { view: "inbox", label: "Inbox", icon: Inbox },
@@ -117,37 +104,6 @@ export function WorkspaceSidebar({
             onClick={() => act(onLife)}
           >
             Life goals
-          </SidebarItem>
-        </SidebarGroup>
-        <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupLabel>Tools</SidebarGroupLabel>
-          <SidebarItem
-            type="button"
-            icon={<Search />}
-            tooltip="Search (F)"
-            aria-label="Search (F)"
-            onClick={() => showDialog("search")}
-          >
-            Search
-          </SidebarItem>
-          <SidebarItem
-            type="button"
-            icon={<ListFilter />}
-            tooltip="Filters"
-            aria-label="Filters"
-            onClick={() => showDialog("filters")}
-          >
-            Filters
-          </SidebarItem>
-          <SidebarItem
-            type="button"
-            icon={<Settings2 />}
-            tooltip="Settings"
-            aria-label="Settings"
-            onClick={() => showDialog("settings")}
-          >
-            Settings
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>

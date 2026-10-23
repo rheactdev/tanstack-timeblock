@@ -364,6 +364,12 @@ a:focus-visible {
   gap: 6px;
   margin-left: auto;
 }
+.planner-calendar-navigation {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+}
 .planner-topbar .planner-topbar-control,
 .planner-topbar-search,
 .planner-topbar .period-date-button,
@@ -727,6 +733,8 @@ a:focus-visible {
   background: hsl(var(--card));
 }
 .collapsed-horizon {
+  --horizon-hover-color: var(--primary);
+  --horizon-hover-text: var(--primary-foreground);
   width: 43px;
   height: 100%;
   display: flex;
@@ -749,9 +757,26 @@ a:focus-visible {
   font-size: 13px;
   font-weight: 500;
 }
-.collapsed-horizon:hover {
-  background: hsl(var(--accent));
-  color: hsl(var(--accent-foreground));
+.collapsed-week {
+  --horizon-hover-color: var(--secondary);
+  --horizon-hover-text: var(--secondary-foreground);
+}
+.collapsed-month {
+  --horizon-hover-color: var(--accent);
+  --horizon-hover-text: var(--accent-foreground);
+}
+.collapsed-year {
+  --horizon-hover-color: var(--success);
+  --horizon-hover-text: var(--success-foreground);
+}
+.collapsed-life {
+  --horizon-hover-color: var(--info);
+  --horizon-hover-text: var(--info-foreground);
+}
+.collapsed-horizon:hover,
+.collapsed-horizon:focus-visible {
+  background: hsl(var(--horizon-hover-color));
+  color: hsl(var(--horizon-hover-text));
 }
 .collapsed-empty {
   display: flex;
@@ -1468,6 +1493,13 @@ a:focus-visible {
   }
 }
 @media (max-width: 1100px) {
+  .planner-calendar-navigation .period-date-button {
+    width: 32px;
+    padding: 0;
+  }
+  .planner-calendar-navigation .period-date-button > span {
+    display: none;
+  }
   .planner-topbar-search {
     width: 32px;
     padding: 0;
@@ -1478,6 +1510,9 @@ a:focus-visible {
   }
 }
 @media (max-width: 767px) {
+  .planner-period-navigation + .return-today {
+    display: none;
+  }
   .planner-layout {
     min-height: 480px;
   }

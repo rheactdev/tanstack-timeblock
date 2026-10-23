@@ -41,7 +41,14 @@ export function ScheduleFields({ value, onChange, today }: { value: Schedule; on
 export function CursorPicker({ cursor, today, onSelect, label }: { cursor: string; today: string; onSelect: (date?: string) => void; label: string }) {
   const [open, setOpen] = useState(false)
   const [typedDate, setTypedDate] = useState(cursor)
-  return <Popover open={open} onOpenChange={next => { if (next) setTypedDate(cursor); setOpen(next) }}><PopoverTrigger asChild><button className="period-date-button" type="button" aria-label={`Choose a date. ${label}`}><CalendarDays size={13} /><span>{label}</span></button></PopoverTrigger><PopoverContent className="date-popover" align="start"><Calendar mode="single" weekStartsOn={1} defaultMonth={toCalendarDate(cursor)} selected={toCalendarDate(cursor)} onSelect={date => { if (date) { onSelect(fromCalendarDate(date)); setOpen(false) } }} /><form className="cursor-date-entry" onSubmit={event => { event.preventDefault(); if (dateSchema.safeParse(typedDate).success) { onSelect(typedDate); setOpen(false) } }}><Input aria-label="Jump to calendar date" type="date" value={typedDate} onChange={event => setTypedDate(event.target.value)} min="1000-01-01" max="9999-12-31" required /><Button type="submit" size="sm">Go</Button></form><Button type="button" className="w-full mt-4" size="sm" onClick={() => { onSelect(undefined); setOpen(false) }}>Today</Button></PopoverContent></Popover>
+  return <Popover open={open} onOpenChange={next => { if (next) setTypedDate(cursor); setOpen(next) }}>
+    <PopoverTrigger asChild><button className="period-date-button" type="button" aria-label={`Choose a date. ${label}`}><CalendarDays size={13} /><span>{label}</span></button></PopoverTrigger>
+    <PopoverContent className="date-popover" align="start">
+      <Calendar mode="single" weekStartsOn={1} defaultMonth={toCalendarDate(cursor)} selected={toCalendarDate(cursor)} onSelect={date => { if (date) { onSelect(fromCalendarDate(date)); setOpen(false) } }} />
+      <form className="cursor-date-entry" onSubmit={event => { event.preventDefault(); if (dateSchema.safeParse(typedDate).success) { onSelect(typedDate); setOpen(false) } }}><Input aria-label="Jump to calendar date" type="date" value={typedDate} onChange={event => setTypedDate(event.target.value)} min="1000-01-01" max="9999-12-31" required /><Button type="submit" size="sm">Go</Button></form>
+      {cursor !== today && <Button type="button" className="w-full mt-4" size="sm" onClick={() => { onSelect(undefined); setOpen(false) }}>Today</Button>}
+    </PopoverContent>
+  </Popover>
 }
 
 export function SchedulePopover({ schedule, today, onChange }: { schedule: Schedule; today: string; onChange: (schedule: Schedule) => void }) {
