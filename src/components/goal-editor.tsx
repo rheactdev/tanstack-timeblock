@@ -73,9 +73,10 @@ export function GoalEditor({ task, mutate, onClose, onDelete }: { task: Task; mu
         <Label htmlFor={completedId}>Completed</Label>
       </div>
     </form>
-    <DialogFooter className="gap-3 sm:gap-0">
-      <Button type="button" variant="outline" disabled={busy || titleIsEmpty} onClick={() => { void duplicateGoal() }}>{duplicating ? 'Duplicating…' : 'Duplicate'}</Button>
+    <DialogFooter>
       <Button type="button" variant="destructive" disabled={busy} onClick={() => { void deleteGoal() }}>{deleting ? 'Deleting…' : 'Delete'}</Button>
+      <Button type="button" disabled={busy || titleIsEmpty} onClick={() => { void duplicateGoal() }}>{duplicating ? 'Duplicating…' : 'Duplicate'}</Button>
+      <Button onClick={() => close()}>Save</Button>
     </DialogFooter>
   </Modal>
 }
