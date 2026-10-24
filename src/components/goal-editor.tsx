@@ -22,18 +22,29 @@ import {
 } from "./ui/navigation-menu";
 import { ButtonGroup } from "./ui/button-group";
 
-type EditorAction = "closing" | "deleting" | "duplicating";
+type EditorAction = "closing" | "deleting" | "duplicating" | "horizon";
+
+const horizonBadgeVariants = {
+  inbox: "default",
+  day: "default",
+  week: "secondary",
+  month: "accent",
+  year: "success",
+  life: "info",
+} as const;
 
 export function GoalEditor({
   task,
   mutate,
   onClose,
   onDelete,
+  onHorizon,
 }: {
   task: Task;
   mutate: Mutate;
   onClose: () => void;
   onDelete: (task: Task) => Promise<boolean>;
+  onHorizon: () => void;
 }) {
   const titleId = useId();
   const notesId = useId();
@@ -108,6 +119,7 @@ export function GoalEditor({
     try {
       if (!(await save())) return;
       if (next === "closing") onClose();
+      else if (next === "horizon") onHorizon();
       else if (next === "deleting") await onDelete(task);
       else if (await mutate({ action: "duplicate", id: task.id }))
         toast.success("Goal duplicated");
@@ -124,9 +136,17 @@ export function GoalEditor({
         void handleAction("closing");
       }}
       headerContent={
-        <Badge>
-          {task.horizon.charAt(0).toUpperCase() + task.horizon.slice(1)}
-        </Badge>
+        <button
+          type="button"
+          className="inline-flex cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+          disabled={busy}
+          aria-label={`Open ${task.horizon} goals`}
+          onClick={() => { void handleAction("horizon"); }}
+        >
+          <Badge variant={horizonBadgeVariants[task.horizon]}>
+            {task.horizon.charAt(0).toUpperCase() + task.horizon.slice(1)}
+          </Badge>
+        </button>
       }
     >
       <form

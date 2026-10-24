@@ -19,6 +19,7 @@ import { Route as PlannerWeeksRouteImport } from './routes/_planner.weeks'
 import { Route as PlannerYearsRouteImport } from './routes/_planner.years'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as PlannerBoardsBoardIdRouteImport } from './routes/_planner.boards.$boardId'
+import { Route as PlannerHorizonHorizonRouteImport } from './routes/_planner.horizon.$horizon'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -70,6 +71,11 @@ const PlannerBoardsBoardIdRoute = PlannerBoardsBoardIdRouteImport.update({
   path: '/boards/$boardId',
   getParentRoute: () => PlannerRoute,
 } as any)
+const PlannerHorizonHorizonRoute = PlannerHorizonHorizonRouteImport.update({
+  id: '/horizon/$horizon',
+  path: '/horizon/$horizon',
+  getParentRoute: () => PlannerRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/years': typeof PlannerYearsRoute
   '/api/health': typeof ApiHealthRoute
   '/boards/$boardId': typeof PlannerBoardsBoardIdRoute
+  '/horizon/$horizon': typeof PlannerHorizonHorizonRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/years': typeof PlannerYearsRoute
   '/api/health': typeof ApiHealthRoute
   '/boards/$boardId': typeof PlannerBoardsBoardIdRoute
+  '/horizon/$horizon': typeof PlannerHorizonHorizonRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/_planner/years': typeof PlannerYearsRoute
   '/api/health': typeof ApiHealthRoute
   '/_planner/boards/$boardId': typeof PlannerBoardsBoardIdRoute
+  '/_planner/horizon/$horizon': typeof PlannerHorizonHorizonRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/years'
     | '/api/health'
     | '/boards/$boardId'
+    | '/horizon/$horizon'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/years'
     | '/api/health'
     | '/boards/$boardId'
+    | '/horizon/$horizon'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/_planner/years'
     | '/api/health'
     | '/_planner/boards/$boardId'
+    | '/_planner/horizon/$horizon'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -233,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlannerBoardsBoardIdRouteImport
       parentRoute: typeof PlannerRoute
     }
+    '/_planner/horizon/$horizon': {
+      id: '/_planner/horizon/$horizon'
+      path: '/horizon/$horizon'
+      fullPath: '/horizon/$horizon'
+      preLoaderRoute: typeof PlannerHorizonHorizonRouteImport
+      parentRoute: typeof PlannerRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -251,6 +270,7 @@ interface PlannerRouteChildren {
   PlannerWeeksRoute: typeof PlannerWeeksRoute
   PlannerYearsRoute: typeof PlannerYearsRoute
   PlannerBoardsBoardIdRoute: typeof PlannerBoardsBoardIdRoute
+  PlannerHorizonHorizonRoute: typeof PlannerHorizonHorizonRoute
 }
 
 const PlannerRouteChildren: PlannerRouteChildren = {
@@ -261,6 +281,7 @@ const PlannerRouteChildren: PlannerRouteChildren = {
   PlannerWeeksRoute: PlannerWeeksRoute,
   PlannerYearsRoute: PlannerYearsRoute,
   PlannerBoardsBoardIdRoute: PlannerBoardsBoardIdRoute,
+  PlannerHorizonHorizonRoute: PlannerHorizonHorizonRoute,
 }
 
 const PlannerRouteWithChildren =

@@ -1551,3 +1551,59 @@ a:focus-visible {
     linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
   background-size: 40px 40px;
 }
+
+.planner-app.planner-focused {
+  grid-template-columns: minmax(0, 1fr);
+}
+.planner-focused .planner-main {
+  min-height: 0;
+}
+.focused-horizon-page {
+  --focused-page-inset: clamp(16px, 5vw, 72px);
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--focused-page-inset);
+  background-color: hsl(var(--background));
+}
+.focused-horizon-panel {
+  --planner-content-inset: clamp(22px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: min(100%, 1360px);
+  min-width: 0;
+  min-height: 100%;
+  border: 3px solid hsl(var(--foreground));
+  background: hsl(var(--card));
+  box-shadow: 8px 8px 0 hsl(var(--shadow-color));
+}
+.focused-horizon-panel .horizon-column {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+}
+.focused-horizon-panel .column-header {
+  padding: clamp(24px, 4vw, 56px) var(--planner-content-inset) 24px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.focused-horizon-panel .column-heading h1 {
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.15;
+  color: hsl(var(--foreground));
+}
+.focused-horizon-panel .column-header-tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+.focused-horizon-panel .column-scroll {
+  flex: initial;
+  overflow: visible;
+  padding-bottom: 48px;
+}

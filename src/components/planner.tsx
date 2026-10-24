@@ -21,7 +21,7 @@ const viewLabels: Record<PlannerView, string> = { horizons: 'Horizons', inbox: '
 const focusViews: Partial<Record<Horizon, NavigationView>> = { inbox: 'inbox', day: 'days', week: 'weeks', month: 'months', year: 'years', life: 'horizons' }
 const navigationHorizons: Partial<Record<PlannerView, DatedHorizon>> = { days: 'day', weeks: 'week', months: 'month', years: 'year' }
 
-export function Planner({ initial, search, view }: { initial: WorkspaceData; search: PlannerSearch; view: PlannerView }) {
+export function Planner({ initial, search, view, focusedHorizon }: { initial: WorkspaceData; search: PlannerSearch; view: PlannerView; focusedHorizon?: Horizon }) {
   const { toggleSidebar, open, openMobile, isMobile } = useSidebar()
   const { data, saving, mutate } = useWorkspace(initial)
   const [dialog, setDialog] = useState<Dialog>(null)
@@ -33,6 +33,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   const navigate = useNavigate()
   const router = useRouter()
   const cursor = search.date || today
+  const focusedSchedule: Schedule | null = focusedHorizon ? { horizon: focusedHorizon, date: periodStart(cursor, focusedHorizon) } : null
   const visibleTasks = filterTasks(data.tasks, search)
   const combined = view === 'horizons'
   const lifeCollapsed = data.preferences.collapsed.includes('life')
@@ -80,7 +81,8 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
 
   function updateSearch(patch: Partial<PlannerSearch>, replace = false) {
     const next = { ...search, ...patch }
-    void navigate({ to: viewPaths[view], search: next, replace })
+    if (focusedHorizon) void navigate({ to: '/horizon/$horizon', params: { horizon: focusedHorizon }, search: next, replace })
+    else void navigate({ to: viewPaths[view], search: next, replace })
   }
   function go(target: NavigationView, patch: Partial<PlannerSearch> = {}) {
     void navigate({ to: viewPaths[target], search: { ...search, goal: undefined, board: 'all', ...patch } })
@@ -100,6 +102,9 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
     void mutate({ action: 'preferences', patch: { collapsed: current.includes(horizon) ? current.filter(value => value !== horizon) : [...current, horizon] } })
   }
   function openGoal(id: string) { updateSearch({ goal: id }) }
+  function openHorizon(schedule: Schedule) {
+    void navigate({ to: '/horizon/$horizon', params: { horizon: schedule.horizon }, search: { ...search, date: schedule.date || search.date, goal: undefined } })
+  }
   function closeGoal() { updateSearch({ goal: undefined }, true) }
   async function removeGoal(task: Task) {
     const result = await mutate({ action: 'delete', id: task.id })
@@ -109,19 +114,19 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
     return true
   }
   const cursorLabel = formatDate(cursor, { month: 'short', day: 'numeric', year: 'numeric' })
-  const navigationHorizon = navigationHorizons[view]
+  const navigationHorizon = focusedHorizon && focusedHorizon !== 'inbox' && focusedHorizon !== 'life' ? focusedHorizon : navigationHorizons[view]
   const previousDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, -1) : cursor
   const nextDate = navigationHorizon ? shiftDate(cursor, navigationHorizon, 1) : cursor
 
   return <>
-    <WorkspaceSidebar user={data.user} view={view} search={search} onLife={openLife} onDialog={setDialog} />
-    <SidebarInset className={`planner-app scene-${data.preferences.scene}`}>
+    <WorkspaceSidebar user={data.user} view={focusedHorizon ? focusViews[focusedHorizon] || view : view} search={search} onLife={openLife} onDialog={setDialog} />
+    <SidebarInset className={`planner-app ${focusedSchedule ? 'planner-focused' : ''} scene-${data.preferences.scene}`}>
     <main className={`planner-main ${combined ? 'combined-horizons' : 'period-view'}`}>
       <header className="planner-topbar">
         <div className="planner-topbar-content">
           <div className="planner-topbar-heading">
             <Button type="button" variant="secondary" size="icon" className="planner-sidebar-toggle" aria-label="Open workspace navigation" title="Open workspace navigation" aria-expanded={isMobile ? openMobile : open} onClick={toggleSidebar}><PanelLeft aria-hidden="true" /></Button>
-            <span className="planner-view-name">{viewLabels[view]}</span>
+            <span className="planner-view-name">{focusedHorizon ? horizonLabels[focusedHorizon] : viewLabels[view]}</span>
           </div>
           <div className="planner-topbar-actions">
               <div className={`planner-calendar-navigation ${navigationHorizon ? 'planner-period-navigation' : ''}`} role="group" aria-label={navigationHorizon ? `${horizonLabels[navigationHorizon]} navigation` : 'Calendar navigation'}>
@@ -136,15 +141,19 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
           </div>
         </div>
       </header>
-      {filtered && <div className="active-filters-bar"><ListFilter size={13} /><span>{search.q ? `“${search.q}” · ` : ''}{visibleTasks.length} matching goals</span><button onClick={() => updateSearch({ q: '', color: 'all', completed: true, board: 'all' })}>Clear filters<X size={12} /></button></div>}
-      <div className="horizons-layout"><div ref={scroll} className={`horizon-columns ${expanded.length === 0 ? 'all-collapsed' : ''}`}>
+      {filtered && <div className="active-filters-bar"><ListFilter size={13} /><span>{search.q ? `“${search.q}” · ` : ''}{focusedSchedule ? 'Filters active' : `${visibleTasks.length} matching goals`}</span><button onClick={() => updateSearch({ q: '', color: 'all', completed: true, board: 'all' })}>Clear filters<X size={12} /></button></div>}
+      {focusedSchedule ? <div className="focused-horizon-page grid-pattern">
+        <section className="focused-horizon-panel" aria-label={`${horizonLabels[focusedSchedule.horizon]} goals`}>
+          <HorizonColumn key={scheduleKey(focusedSchedule)} schedule={focusedSchedule} tasks={sortedTasks(visibleTasks.filter(task => samePeriod(task, focusedSchedule)), data.preferences.sorts[scheduleKey(focusedSchedule)])} today={today} mutate={mutate} collapsible={false} onCollapse={collapse} onFocus={focus} dragging={dragging} setDragging={setDragging} onOpen={openGoal} expandedCount={1} dedicated onExitFocus={() => go('horizons')} />
+        </section>
+      </div> : <div className="horizons-layout"><div ref={scroll} className={`horizon-columns ${expanded.length === 0 ? 'all-collapsed' : ''}`}>
         {expanded.map(schedule => <HorizonColumn key={scheduleKey(schedule)} schedule={schedule} tasks={sortedTasks(visibleTasks.filter(task => samePeriod(task, schedule)), data.preferences.sorts[scheduleKey(schedule)])} today={today} mutate={mutate} collapsible={combined} onCollapse={collapse} onFocus={focus} dragging={dragging} setDragging={setDragging} onOpen={openGoal} expandedCount={expanded.length} dedicated={!combined} />)}
         {expanded.length === 0 && <div className="collapsed-empty"><Columns3 size={26} /><p>Expand a horizon to see your goals.</p><Button variant="outline" size="sm" onClick={() => void mutate({ action: 'preferences', patch: { collapsed: [] } })}>Expand all</Button></div>}
-      </div>{collapsed.length > 0 && <div className="collapsed-horizons" aria-label="Collapsed horizons">{collapsed.map(schedule => <button key={schedule.horizon} className={`collapsed-horizon collapsed-${schedule.horizon}`} onClick={() => collapse(schedule.horizon)} aria-label={`Expand ${horizonLabels[schedule.horizon]}`}><span>{horizonLabels[schedule.horizon]}</span></button>)}</div>}</div>
+      </div>{collapsed.length > 0 && <div className="collapsed-horizons" aria-label="Collapsed horizons">{collapsed.map(schedule => <button key={schedule.horizon} className={`collapsed-horizon collapsed-${schedule.horizon}`} onClick={() => collapse(schedule.horizon)} aria-label={`Expand ${horizonLabels[schedule.horizon]}`}><span>{horizonLabels[schedule.horizon]}</span></button>)}</div>}</div>}
     </main>
-    <aside className="scenery-strip grid-pattern" aria-hidden="true" />
+    {!focusedSchedule && <aside className="scenery-strip grid-pattern" aria-hidden="true" />}
 
-    {selected && <GoalEditor key={selected.id} task={selected} mutate={mutate} onClose={closeGoal} onDelete={removeGoal} />}
+    {selected && <GoalEditor key={selected.id} task={selected} mutate={mutate} onClose={closeGoal} onDelete={removeGoal} onHorizon={() => openHorizon(selected)} />}
     {search.goal && !selected && <div className="missing-goal-notice" role="status">This goal is unavailable.<button onClick={closeGoal}>Dismiss</button></div>}
     {dialog === 'search' && <SearchDialog data={{ ...data, today }} query={search.q} onOpen={openGoal} onFilter={q => updateSearch({ q })} onClose={() => setDialog(null)} />}
     {dialog === 'filters' && <FilterDialog search={search} onChange={updateSearch} onClose={() => setDialog(null)} />}
