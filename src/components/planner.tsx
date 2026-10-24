@@ -10,8 +10,8 @@ import { toast } from './ui/toast'
 import { SidebarInset, useSidebar } from './ui/sidebar'
 import { WorkspaceSidebar } from './workspace-sidebar'
 import { HorizonColumn } from './horizon-column'
-import { GoalEditor, PositionDialog } from './goal-editor'
-import { CursorPicker, horizonLabels, RescheduleDialog } from './schedule-picker'
+import { GoalEditor } from './goal-editor'
+import { CursorPicker, horizonLabels } from './schedule-picker'
 import { AccountDialog, AppearanceDialog, DeletedDialog, FilterDialog, HelpDialog, SearchDialog, SettingsDialog } from './workspace-dialogs'
 
 type Dialog = 'account' | 'appearance' | 'deleted' | 'filters' | 'help' | 'search' | 'settings' | null
@@ -25,8 +25,6 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   const { toggleSidebar, open, openMobile, isMobile } = useSidebar()
   const { data, saving, mutate } = useWorkspace(initial)
   const [dialog, setDialog] = useState<Dialog>(null)
-  const [reschedule, setReschedule] = useState<Task | null>(null)
-  const [position, setPosition] = useState<Task | null>(null)
   const [dragging, setDragging] = useState<string | null>(null)
   const [today, setToday] = useState(data.today)
   const [lifeFocusRequest, setLifeFocusRequest] = useState(0)
@@ -105,9 +103,10 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
   function closeGoal() { updateSearch({ goal: undefined }, true) }
   async function removeGoal(task: Task) {
     const result = await mutate({ action: 'delete', id: task.id })
-    if (!result) return
+    if (!result) return false
     if (search.goal === task.id) closeGoal()
     toast({ title: 'Goal deleted', duration: 8000, action: { label: 'Undo', onClick: () => { void mutate({ action: 'restore', id: task.id }) } } })
+    return true
   }
   const cursorLabel = formatDate(cursor, { month: 'short', day: 'numeric', year: 'numeric' })
   const navigationHorizon = navigationHorizons[view]
@@ -139,16 +138,14 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
       </header>
       {filtered && <div className="active-filters-bar"><ListFilter size={13} /><span>{search.q ? `“${search.q}” · ` : ''}{visibleTasks.length} matching goals</span><button onClick={() => updateSearch({ q: '', color: 'all', completed: true, board: 'all' })}>Clear filters<X size={12} /></button></div>}
       <div className="horizons-layout"><div ref={scroll} className={`horizon-columns ${expanded.length === 0 ? 'all-collapsed' : ''}`}>
-        {expanded.map(schedule => <HorizonColumn key={scheduleKey(schedule)} schedule={schedule} tasks={sortedTasks(visibleTasks.filter(task => samePeriod(task, schedule)), data.preferences.sorts[scheduleKey(schedule)])} today={today} mutate={mutate} collapsible={combined} onCollapse={collapse} onFocus={focus} dragging={dragging} setDragging={setDragging} onOpen={openGoal} onSchedule={setReschedule} onPosition={setPosition} onDelete={task => void removeGoal(task)} expandedCount={expanded.length} dedicated={!combined} />)}
+        {expanded.map(schedule => <HorizonColumn key={scheduleKey(schedule)} schedule={schedule} tasks={sortedTasks(visibleTasks.filter(task => samePeriod(task, schedule)), data.preferences.sorts[scheduleKey(schedule)])} today={today} mutate={mutate} collapsible={combined} onCollapse={collapse} onFocus={focus} dragging={dragging} setDragging={setDragging} onOpen={openGoal} expandedCount={expanded.length} dedicated={!combined} />)}
         {expanded.length === 0 && <div className="collapsed-empty"><Columns3 size={26} /><p>Expand a horizon to see your goals.</p><Button variant="outline" size="sm" onClick={() => void mutate({ action: 'preferences', patch: { collapsed: [] } })}>Expand all</Button></div>}
       </div>{collapsed.length > 0 && <div className="collapsed-horizons" aria-label="Collapsed horizons">{collapsed.map(schedule => <button key={schedule.horizon} className={`collapsed-horizon collapsed-${schedule.horizon}`} onClick={() => collapse(schedule.horizon)} aria-label={`Expand ${horizonLabels[schedule.horizon]}`}><span>{horizonLabels[schedule.horizon]}</span></button>)}</div>}</div>
     </main>
     <aside className="scenery-strip grid-pattern" aria-hidden="true" />
 
-    {selected && <GoalEditor key={selected.id} task={selected} mutate={mutate} onClose={closeGoal} />}
+    {selected && <GoalEditor key={selected.id} task={selected} mutate={mutate} onClose={closeGoal} onDelete={removeGoal} />}
     {search.goal && !selected && <div className="missing-goal-notice" role="status">This goal is unavailable.<button onClick={closeGoal}>Dismiss</button></div>}
-    {reschedule && <RescheduleDialog id={reschedule.id} title={reschedule.title} schedule={{ horizon: reschedule.horizon, date: reschedule.date }} today={today} mutate={mutate} onClose={() => setReschedule(null)} />}
-    {position && <PositionDialog task={position} tasks={data.tasks} mutate={mutate} onClose={() => setPosition(null)} />}
     {dialog === 'search' && <SearchDialog data={{ ...data, today }} query={search.q} onOpen={openGoal} onFilter={q => updateSearch({ q })} onClose={() => setDialog(null)} />}
     {dialog === 'filters' && <FilterDialog search={search} onChange={updateSearch} onClose={() => setDialog(null)} />}
     {dialog === 'deleted' && <DeletedDialog data={{ ...data, today }} mutate={mutate} onClose={() => setDialog(null)} />}

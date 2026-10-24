@@ -1,16 +1,13 @@
 import { useRef, useState, type DragEvent } from 'react'
-import { CalendarDays, Check, Copy, GripVertical, MoreHorizontal, MoveVertical, Pencil, Trash2 } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
 import { Checkbox } from './ui/checkbox'
 import { Input } from './ui/input'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { Button } from './ui/button'
-import { colorLabels, goalColors, type Task } from '../lib/model'
+import { colorLabels, type Task } from '../lib/model'
 import type { Mutate } from './use-workspace'
 
 export const goalDragType = 'application/x-timestripe-goal'
-export function GoalRow({ task, mutate, onOpen, onSchedule, onPosition, onDelete, dragging, onDrag, onDrop }: {
-  task: Task; mutate: Mutate; onOpen: (id: string) => void; onSchedule: (task: Task) => void;
-  onPosition: (task: Task) => void; onDelete: (task: Task) => void;
+export function GoalRow({ task, mutate, onOpen, dragging, onDrag, onDrop }: {
+  task: Task; mutate: Mutate; onOpen: (id: string) => void;
   dragging: string | null; onDrag: (id: string | null) => void; onDrop: (event: DragEvent, beforeId: string | null) => void;
 }) {
   const [editing, setEditing] = useState(false)
@@ -33,15 +30,5 @@ export function GoalRow({ task, mutate, onOpen, onSchedule, onPosition, onDelete
       if (event.key === 'Enter') { event.preventDefault(); commit() }
       if (event.key === 'Escape') { event.preventDefault(); submitted.current = true; setEditing(false) }
     }} /> : <button type="button" className="goal-title" onClick={event => { if (event.altKey) rename(); else onOpen(task.id) }} onKeyDown={event => { if (event.key === 'Enter' && event.altKey) { event.preventDefault(); rename() } }}><span>{task.title}</span>{task.color !== 'none' && <i className="goal-color-marker" aria-label={colorLabels[task.color]} style={{ backgroundColor: task.color }} />}{task.notes && <span className="goal-note-indicator" title="Has notes" aria-label="Has notes">≡</span>}</button>}
-    <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="goal-menu-trigger" aria-label={`Options for ${task.title}`}><MoreHorizontal size={17} /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="goal-menu">
-      <DropdownMenuItem onSelect={() => onOpen(task.id)}><Pencil size={14} />Open goal</DropdownMenuItem>
-      <DropdownMenuItem onSelect={rename}><Pencil size={14} />Rename</DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => onSchedule(task)}><CalendarDays size={14} />Reschedule</DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => onPosition(task)}><MoveVertical size={14} />Move to position</DropdownMenuItem>
-      <DropdownMenuSub><DropdownMenuSubTrigger>Color</DropdownMenuSubTrigger><DropdownMenuSubContent>{goalColors.map(color => <DropdownMenuItem key={color} onSelect={() => void mutate({ action: 'update', id: task.id, patch: { color } })}><span className="color-dot" style={{ backgroundColor: color === 'none' ? 'transparent' : color }} />{colorLabels[color]}{task.color === color && <Check size={13} className="ml-auto" />}</DropdownMenuItem>)}</DropdownMenuSubContent></DropdownMenuSub>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onSelect={() => void mutate({ action: 'duplicate', id: task.id })}><Copy size={14} />Duplicate</DropdownMenuItem>
-      <DropdownMenuItem className="danger-menu-item" onSelect={() => onDelete(task)}><Trash2 size={14} />Delete</DropdownMenuItem>
-    </DropdownMenuContent></DropdownMenu>
   </article>
 }

@@ -652,28 +652,6 @@ a:focus-visible {
 .is-complete .goal-color-marker {
   opacity: 0.35;
 }
-.goal-menu-trigger {
-  position: absolute;
-  right: -9px;
-  top: 11px;
-  height: 24px;
-  width: 23px;
-  border: 0;
-  padding: 0;
-  color: hsl(var(--muted-foreground));
-  background: hsl(var(--card));
-  opacity: 0;
-  box-shadow: none;
-}
-.goal-menu-trigger > svg {
-  width: 15px;
-  height: 15px;
-}
-.goal-row:hover .goal-menu-trigger,
-.goal-row:focus-within .goal-menu-trigger,
-.goal-menu-trigger[data-state="open"] {
-  opacity: 1;
-}
 .inline-goal-input {
   height: 30px;
   min-width: 0;
@@ -703,9 +681,6 @@ a:focus-visible {
   box-shadow: inset 0 0 0 2px hsl(var(--secondary) / 0.65);
 }
 .add-goal-form {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
   margin-top: 5px;
   padding: 9px 0;
 }
@@ -713,33 +688,78 @@ a:focus-visible {
   width: 19px;
   height: 19px;
   border: 2px solid hsl(var(--foreground) / 0.08);
-  margin-top: 4px;
   flex-shrink: 0;
+}
+.add-goal-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  height: 40px;
+  margin: 0 -9px;
+  padding: 0 6px;
+  border: 3px solid transparent;
+  background: transparent;
+  cursor: text;
+  transition: border-color 150ms, background-color 150ms;
+}
+.add-goal-control:focus-within,
+.add-goal-control[data-adding="true"] {
+  border-color: hsl(var(--secondary));
+  background: hsl(var(--background));
+  box-shadow: 4px 4px 0 hsl(var(--shadow-color));
 }
 .add-goal-input {
   min-width: 0;
   flex: 1;
-  height: 27px;
+  height: 30px;
   border: 0;
   padding: 0;
   background: transparent;
   box-shadow: none;
   font-size: 15px;
+  font-weight: 400;
   line-height: 1.65;
+  translate: none;
+  transform: none;
 }
 .add-goal-input::placeholder {
   color: hsl(var(--foreground) / 0.32);
 }
-.add-goal-input:focus-visible {
+.add-goal-input:focus {
+  outline: none;
+  translate: none;
   transform: none;
   box-shadow: none;
 }
-.add-goal-form:focus-within .add-goal-square {
-  border-color: hsl(var(--secondary) / 0.6);
+.add-goal-control:focus-within .add-goal-square,
+.add-goal-control[data-adding="true"] .add-goal-square {
+  border-color: hsl(var(--foreground));
 }
-.add-goal-form > button {
-  padding: 6px 0 0;
-  color: hsl(var(--secondary));
+.add-goal-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 46px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  color: hsl(var(--foreground));
+  background: transparent;
+  visibility: hidden;
+}
+.add-goal-control:focus-within .add-goal-submit,
+.add-goal-control[data-adding="true"] .add-goal-submit {
+  visibility: visible;
+}
+.add-goal-submit:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.add-goal-submit:focus-visible {
+  outline: 2px solid hsl(var(--secondary));
+  outline-offset: 4px;
 }
 .period-date-button {
   display: flex;
@@ -941,16 +961,6 @@ a:focus-visible {
   height: 11px;
   border: 1px solid hsl(var(--foreground) / 0.6);
   flex-shrink: 0;
-}
-.danger-menu-item {
-  color: #f98b8b;
-}
-.goal-menu {
-  min-width: 205px;
-}
-.goal-menu [role="menuitem"] {
-  gap: 9px;
-  font-size: 12px;
 }
 .date-popover {
   width: auto;
@@ -1324,6 +1334,9 @@ a:focus-visible {
     padding-bottom: 11px;
     gap: 11px;
   }
+  .add-goal-control {
+    gap: 11px;
+  }
   .goal-checkbox,
   .add-goal-square {
     width: 21px;
@@ -1421,9 +1434,8 @@ a:focus-visible {
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  .goal-menu-trigger {
-    opacity: 0.6;
-    right: -8px;
+  .add-goal-control {
+    gap: 9px;
   }
   .goal-title {
     padding-right: 10px;

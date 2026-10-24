@@ -14,20 +14,22 @@ export function useGoalDraft(task: Task, mutate: Mutate) {
   const current = useRef(draft)
   const confirmed = useRef(draft)
   const mutateRef = useRef(mutate)
-  const pendingSave = useRef<Promise<void> | null>(null)
+  const pendingSave = useRef<Promise<boolean> | null>(null)
   const mounted = useRef(false)
   const composing = useRef(false)
   const saveAfterComposition = useRef(false)
+  const savingEnabled = useRef(true)
   mutateRef.current = mutate
 
-  const save = useCallback(async function persist(): Promise<void> {
+  const save = useCallback(async function persist(): Promise<boolean> {
+    if (!savingEnabled.current) return false
     if (composing.current) {
       saveAfterComposition.current = true
-      return
+      return false
     }
     // Coalesce edits made during a request and compare against its confirmed result.
     if (pendingSave.current) {
-      await pendingSave.current
+      if (!await pendingSave.current) return false
       return persist()
     }
     const snapshot = { ...current.current }
@@ -36,7 +38,7 @@ export function useGoalDraft(task: Task, mutate: Mutate) {
     if (title && title !== confirmed.current.title) patch.title = title
     if (snapshot.notes !== confirmed.current.notes) patch.notes = snapshot.notes
     if (snapshot.completed !== confirmed.current.completed) patch.completed = snapshot.completed
-    if (!Object.keys(patch).length) return
+    if (!Object.keys(patch).length) return true
 
     const request = (async () => {
       let savedTask: Task | undefined
@@ -49,7 +51,7 @@ export function useGoalDraft(task: Task, mutate: Mutate) {
       }
       if (savedTask) {
         confirmed.current = goalDraft(savedTask)
-        return
+        return true
       }
       // Roll back failed fields without discarding newer typing in those fields.
       const latest = current.current
@@ -60,10 +62,11 @@ export function useGoalDraft(task: Task, mutate: Mutate) {
       }
       current.current = restored
       if (mounted.current) setDraft(restored)
+      return false
     })()
     pendingSave.current = request
     try {
-      await request
+      return await request
     } finally {
       if (pendingSave.current === request) pendingSave.current = null
     }
@@ -96,5 +99,9 @@ export function useGoalDraft(task: Task, mutate: Mutate) {
     }
   }
 
-  return { draft, update, save, startComposition, endComposition }
+  function setSavingEnabled(enabled: boolean) {
+    savingEnabled.current = enabled
+  }
+
+  return { draft, update, save, startComposition, endComposition, setSavingEnabled }
 }
