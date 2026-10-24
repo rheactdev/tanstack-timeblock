@@ -145,7 +145,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
     </main>
     <aside className="scenery-strip grid-pattern" aria-hidden="true" />
 
-    {selected && <GoalEditor key={selected.id} task={selected} today={today} mutate={mutate} onClose={closeGoal} onDelete={task => void removeGoal(task)} />}
+    {selected && <GoalEditor key={selected.id} task={selected} mutate={mutate} onClose={closeGoal} />}
     {search.goal && !selected && <div className="missing-goal-notice" role="status">This goal is unavailable.<button onClick={closeGoal}>Dismiss</button></div>}
     {reschedule && <RescheduleDialog id={reschedule.id} title={reschedule.title} schedule={{ horizon: reschedule.horizon, date: reschedule.date }} today={today} mutate={mutate} onClose={() => setReschedule(null)} />}
     {position && <PositionDialog task={position} tasks={data.tasks} mutate={mutate} onClose={() => setPosition(null)} />}

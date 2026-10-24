@@ -909,43 +909,14 @@ a:focus-visible {
   font-size: 13px;
   cursor: pointer;
 }
-.dialog-actions,
-.editor-footer {
+.dialog-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
 }
-.editor-footer {
-  margin-top: 7px;
-  border-top: 2px solid hsl(var(--foreground) / 0.12);
-  padding-top: 22px;
-}
-.editor-footer > button:first-child {
-  margin-right: auto;
-}
 .goal-editor {
   width: min(620px, calc(100vw - 32px));
-}
-.goal-editor > div:first-child {
-  margin-bottom: -10px;
-}
-.goal-title-editor {
-  font-size: 26px;
-  font-weight: 650;
-  letter-spacing: -0.4px;
-  border: 0;
-  padding: 0;
-  box-shadow: none;
-  background: transparent;
-  min-height: 78px;
-  line-height: 1.4;
-  resize: vertical;
-}
-.goal-title-editor:focus-visible {
-  transform: none;
-  box-shadow: none;
-  outline: 0;
 }
 .schedule-trigger {
   justify-content: flex-start;
@@ -958,40 +929,6 @@ a:focus-visible {
   padding-left: 10px;
   padding-right: 10px;
   overflow: hidden;
-}
-.color-field {
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-.color-field legend {
-  font-size: 13px;
-  font-weight: 600;
-  color: hsl(var(--muted-foreground));
-  margin-bottom: 13px;
-}
-.color-choices {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  flex-wrap: wrap;
-}
-.color-choice {
-  width: 26px;
-  height: 26px;
-  border: 2px solid hsl(var(--foreground) / 0.7);
-  box-shadow: 2px 2px 0 #000;
-  color: #15151a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.color-choice:first-child {
-  color: hsl(var(--foreground));
-}
-.color-choice.selected {
-  outline: 2px solid hsl(var(--foreground));
-  outline-offset: 3px;
 }
 .goal-notes {
   resize: vertical;
@@ -1520,9 +1457,6 @@ a:focus-visible {
   }
   .planner-dialog h2 {
     font-size: 22px;
-  }
-  .goal-title-editor {
-    font-size: 23px;
   }
   .goal-editor {
     width: calc(100vw - 30px);

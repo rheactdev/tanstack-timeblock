@@ -18,8 +18,8 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   )
 )
 IconButton.displayName = 'IconButton'
-export function Modal({ title, description, children, onClose, className }: { title: string; description?: string; children: ReactNode; onClose: () => void; className?: string }) {
-  return <Dialog open onOpenChange={open => { if (!open) onClose() }}><DialogContent className={cn('planner-dialog', className)}><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription className={description ? '' : 'sr-only'}>{description || title}</DialogDescription></DialogHeader>{children}</DialogContent></Dialog>
+export function Modal({ title, description, children, onClose, className, hideHeader = false, headerContent }: { title: string; description?: string; children: ReactNode; onClose: () => void; className?: string; hideHeader?: boolean; headerContent?: ReactNode }) {
+  return <Dialog open onOpenChange={open => { if (!open) onClose() }}><DialogContent className={cn('planner-dialog', className)} headerContent={headerContent}><DialogHeader className={hideHeader ? 'sr-only' : undefined}><DialogTitle>{title}</DialogTitle><DialogDescription className={description ? '' : 'sr-only'}>{description || title}</DialogDescription></DialogHeader>{children}</DialogContent></Dialog>
 }
 export function SelectField({ label, value, onChange, items, className }: { label: string; value: string; onChange: (value: string) => void; items: { value: string; label: string }[]; className?: string }) {
   return <Select value={value} onValueChange={onChange}><SelectTrigger aria-label={label} className={cn('planner-select', className)}><SelectValue /></SelectTrigger><SelectContent>{items.map(item => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select>

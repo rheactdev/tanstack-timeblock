@@ -1,29 +1,45 @@
-import { useState } from 'react'
-import { Check, LoaderCircle, Trash2 } from 'lucide-react'
+import { useId, useState } from 'react'
+import { Badge } from './ui/badge'
 import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
 import { Checkbox } from './ui/checkbox'
 import { Modal, SelectField } from './planner-controls'
-import { SchedulePopover } from './schedule-picker'
-import { goalColors, colorLabels, type Task } from '../lib/model'
+import type { Task } from '../lib/model'
 import { samePeriod, sortedTasks } from '../lib/calendar'
+import { useGoalAutosave } from './use-goal-autosave'
 import type { Mutate } from './use-workspace'
 
-export function GoalEditor({ task, today, mutate, onClose, onDelete }: { task: Task; today: string; mutate: Mutate; onClose: () => void; onDelete: (task: Task) => void }) {
-  const [draft, setDraft] = useState(task)
-  const [busy, setBusy] = useState(false)
-  return <Modal title="Goal" description="Edit this goal and its schedule." onClose={onClose} className="goal-editor">
+export function GoalEditor({ task, mutate, onClose }: { task: Task; mutate: Mutate; onClose: () => void }) {
+  const titleId = useId()
+  const notesId = useId()
+  const completedId = useId()
+  const titleErrorId = useId()
+  const { draft, update, flush, startComposition, endComposition } = useGoalAutosave(task, mutate)
+  const titleIsEmpty = !draft.title.trim()
+  function close() {
+    void flush()
+    onClose()
+  }
+  return <Modal title="Edit goal" hideHeader onClose={close} className="goal-editor" headerContent={<Badge>{task.horizon.charAt(0).toUpperCase() + task.horizon.slice(1)}</Badge>}>
     <form className="editor-form" onSubmit={async event => {
-      event.preventDefault(); setBusy(true)
-      const result = await mutate({ action: 'update', id: task.id, patch: { title: draft.title.trim(), notes: draft.notes, completed: draft.completed, color: draft.color }, schedule: { horizon: draft.horizon, date: draft.date } })
-      setBusy(false); if (result) onClose()
-    }}>
-      <Textarea aria-label="Goal title" className="goal-title-editor" value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} maxLength={240} rows={2} required />
-      <label className="field-stack"><span>Schedule</span><SchedulePopover schedule={{ horizon: draft.horizon, date: draft.date }} today={today} onChange={schedule => setDraft({ ...draft, ...schedule })} /></label>
-      <fieldset className="color-field"><legend>Color</legend><div className="color-choices">{goalColors.map(color => <button type="button" key={color} className={`color-choice ${draft.color === color ? 'selected' : ''}`} title={colorLabels[color]} aria-label={colorLabels[color]} aria-pressed={draft.color === color} style={{ backgroundColor: color === 'none' ? 'transparent' : color }} onClick={() => setDraft({ ...draft, color })}>{draft.color === color && <Check size={14} />}</button>)}</div></fieldset>
-      <label className="field-stack"><span>Notes & thoughts</span><Textarea aria-label="Notes and thoughts" placeholder="Add notes..." className="goal-notes" value={draft.notes} onChange={event => setDraft({ ...draft, notes: event.target.value })} rows={7} maxLength={5000} /></label>
-      <label className="checkbox-label"><Checkbox checked={draft.completed} onCheckedChange={value => setDraft({ ...draft, completed: value === true })} />Completed</label>
-      <div className="editor-footer"><Button type="button" variant="ghost" className="danger-menu-item" disabled={busy} onClick={() => onDelete(task)}><Trash2 size={15} />Delete</Button><Button type="submit" disabled={busy || !draft.title.trim()}>{busy ? <LoaderCircle size={15} className="spin" /> : <Check size={15} />}Save</Button></div>
+      event.preventDefault()
+      await flush()
+    }} onBlur={() => { void flush() }} onCompositionStart={startComposition} onCompositionEnd={endComposition}>
+      <div className="grid w-full gap-2">
+        <Label htmlFor={titleId}>Title</Label>
+        <Input autoFocus type="text" id={titleId} name="title" placeholder="Enter a goal title" value={draft.title} onChange={event => update({ title: event.target.value })} aria-invalid={titleIsEmpty || undefined} aria-describedby={titleIsEmpty ? titleErrorId : undefined} maxLength={240} required />
+        {titleIsEmpty && <p id={titleErrorId} className="form-error" role="alert">Title is required.</p>}
+      </div>
+      <div className="grid w-full gap-2">
+        <Label htmlFor={notesId}>Notes & thoughts</Label>
+        <Textarea id={notesId} name="notes" placeholder="Add notes..." className="goal-notes" value={draft.notes} onChange={event => update({ notes: event.target.value })} rows={7} maxLength={5000} />
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox id={completedId} checked={draft.completed} onCheckedChange={value => update({ completed: value === true }, true)} />
+        <Label htmlFor={completedId}>Completed</Label>
+      </div>
     </form>
   </Modal>
 }
