@@ -11,6 +11,18 @@ npm run dev
 
 Open http://localhost:3000. Without `COUCHDB_URL`, development uses private JSON documents in the ignored `.data/` directory. Tasks, boards, accounts, and the generated development signing secret persist across restarts. Each visitor gets an isolated workspace using a signed, HttpOnly cookie. Signing in opens the account’s own workspace; guest tasks are kept separately.
 
+## Add UI components
+
+The shadcn CLI is configured in `components.json` with the [BoldKit React registry](https://github.com/ANIBIT14/boldkit#quick-start), Tailwind CSS v4, and `src/styles.css`. The `@/` alias resolves to `src/` in TypeScript and Vite; new UI components go into `src/components/ui/` and use the existing `src/lib/utils.ts`.
+
+Add components from the project root with:
+
+```sh
+npx shadcn@latest add @boldkit/field
+```
+
+Replace `field` with the component name, or pass multiple names such as `@boldkit/button @boldkit/input`. At overwrite prompts, keep existing files to preserve their local changes. The existing theme and components are already in place; initialization and theme installation are not needed.
+
 ## Use local CouchDB
 
 Compose runs only CouchDB for local development. The application runs on your host with `npm run dev`.

@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Copy, CopyIcon, Icon, Trash2, TrashIcon } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -7,11 +7,20 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { DialogFooter } from "./ui/dialog";
-import { Modal, SelectField } from "./planner-controls";
+import { Modal } from "./planner-controls";
 import type { Task } from "../lib/model";
-import { samePeriod, sortedTasks } from "../lib/calendar";
 import { toast } from "./ui/toast";
 import type { Mutate } from "./use-workspace";
+import { Label } from "./ui/label";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "./ui/navigation-menu";
+import { ButtonGroup } from "./ui/button-group";
 
 type EditorAction = "closing" | "deleting" | "duplicating";
 
@@ -168,7 +177,7 @@ export function GoalEditor({
               disabled={busy}
             />
           </Field>
-          <Field>
+          <div className="flex items-center space-x-2">
             <Checkbox
               id={completedId}
               checked={draft.completed}
@@ -177,17 +186,15 @@ export function GoalEditor({
               }
               disabled={busy}
             />
-            <FieldLabel htmlFor={completedId}>Completed</FieldLabel>
-          </Field>
+            <Label htmlFor={completedId}>Completed</Label>
+          </div>
         </FieldGroup>
       </form>
-      <DialogFooter
-        aria-busy={busy}
-      >
+      <DialogFooter aria-busy={busy}>
         <Button
           type="button"
           size="sm"
-          variant="outline"
+          variant="destructive"
           disabled={busy}
           onClick={() => {
             void handleAction("deleting");
@@ -196,6 +203,7 @@ export function GoalEditor({
           <Trash2 aria-hidden="true" />
           {action === "deleting" ? "Deleting…" : "Delete"}
         </Button>
+        <ButtonGroup>
           <Button
             type="button"
             size="sm"
@@ -205,75 +213,21 @@ export function GoalEditor({
               void handleAction("duplicating");
             }}
           >
+            <CopyIcon />
             {action === "duplicating" ? "Duplicating…" : "Duplicate"}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={busy}
-            onClick={() => {
-              void handleAction("closing");
-            }}
-          >
-            {action === "closing" ? "Saving…" : "Close"}
-          </Button>
+        </ButtonGroup>
+        <Button
+          type="button"
+          size="sm"
+          disabled={busy}
+          onClick={() => {
+            void handleAction("closing");
+          }}
+        >
+          {action === "closing" ? "Saving…" : "Close"}
+        </Button>
       </DialogFooter>
-    </Modal>
-  );
-}
-
-export function PositionDialog({
-  task,
-  tasks,
-  mutate,
-  onClose,
-}: {
-  task: Task;
-  tasks: Task[];
-  mutate: Mutate;
-  onClose: () => void;
-}) {
-  const siblings = sortedTasks(
-    tasks.filter(
-      (item) =>
-        !item.deletedAt && item.id !== task.id && samePeriod(item, task),
-    ),
-  );
-  const [beforeId, setBeforeId] = useState(siblings[0]?.id || "__last");
-  const [busy, setBusy] = useState(false);
-  return (
-    <Modal title="Move to position" description={task.title} onClose={onClose}>
-      <label>
-        <span>Place this goal</span>
-        <SelectField
-          label="Goal position"
-          value={beforeId}
-          onChange={setBeforeId}
-          items={[
-            ...siblings.map((item, index) => ({
-              value: item.id,
-              label: `${index + 1}. Before ${item.title}`,
-            })),
-            { value: "__last", label: "At the end of the list" },
-          ]}
-        />
-      </label>
-      <Button
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true);
-          const result = await mutate({
-            action: "move",
-            id: task.id,
-            schedule: { horizon: task.horizon, date: task.date },
-            beforeId: beforeId === "__last" ? null : beforeId,
-          });
-          setBusy(false);
-          if (result) onClose();
-        }}
-      >
-        Move goal
-      </Button>
     </Modal>
   );
 }
