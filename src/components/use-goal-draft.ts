@@ -4,33 +4,31 @@ import type { Mutate } from './use-workspace'
 import { toast } from './ui/toast'
 
 type GoalDraft = Pick<Task, 'title' | 'notes' | 'completed'>
-const AUTOSAVE_DELAY = 500
 
 function goalDraft(task: Task): GoalDraft {
   return { title: task.title, notes: task.notes, completed: task.completed }
 }
 
-export function useGoalAutosave(task: Task, mutate: Mutate) {
+export function useGoalDraft(task: Task, mutate: Mutate) {
   const [draft, setDraft] = useState(() => goalDraft(task))
   const current = useRef(draft)
   const confirmed = useRef(draft)
   const mutateRef = useRef(mutate)
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingSave = useRef<Promise<void> | null>(null)
   const mounted = useRef(false)
   const composing = useRef(false)
+  const saveAfterComposition = useRef(false)
   mutateRef.current = mutate
 
-  const flush = useCallback(async function save(): Promise<void> {
-    if (timer.current !== null) {
-      clearTimeout(timer.current)
-      timer.current = null
+  const save = useCallback(async function persist(): Promise<void> {
+    if (composing.current) {
+      saveAfterComposition.current = true
+      return
     }
-    if (composing.current) return
     // Coalesce edits made during a request and compare against its confirmed result.
     if (pendingSave.current) {
       await pendingSave.current
-      return save()
+      return persist()
     }
     const snapshot = { ...current.current }
     const patch: Partial<GoalDraft> = {}
@@ -76,35 +74,27 @@ export function useGoalAutosave(task: Task, mutate: Mutate) {
     return () => {
       mounted.current = false
       composing.current = false
-      // Closing or navigating away must not discard a queued edit.
-      void flush()
+      // Closing or navigating away commits any remaining draft edits.
+      void save()
     }
-  }, [flush])
+  }, [save])
 
-  function scheduleSave() {
-    if (timer.current !== null) clearTimeout(timer.current)
-    timer.current = setTimeout(() => { void flush() }, AUTOSAVE_DELAY)
-  }
-
-  function update(patch: Partial<GoalDraft>, immediately = false) {
+  function update(patch: Partial<GoalDraft>) {
     current.current = { ...current.current, ...patch }
     setDraft(current.current)
-    if (immediately) void flush()
-    else scheduleSave()
   }
 
   function startComposition() {
     composing.current = true
-    if (timer.current !== null) {
-      clearTimeout(timer.current)
-      timer.current = null
-    }
   }
 
   function endComposition() {
     composing.current = false
-    scheduleSave()
+    if (saveAfterComposition.current) {
+      saveAfterComposition.current = false
+      void save()
+    }
   }
 
-  return { draft, update, flush, startComposition, endComposition }
+  return { draft, update, save, startComposition, endComposition }
 }

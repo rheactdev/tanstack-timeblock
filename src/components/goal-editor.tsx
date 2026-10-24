@@ -8,7 +8,7 @@ import { Checkbox } from './ui/checkbox'
 import { Modal, SelectField } from './planner-controls'
 import type { Task } from '../lib/model'
 import { samePeriod, sortedTasks } from '../lib/calendar'
-import { useGoalAutosave } from './use-goal-autosave'
+import { useGoalDraft } from './use-goal-draft'
 import type { Mutate } from './use-workspace'
 
 export function GoalEditor({ task, mutate, onClose }: { task: Task; mutate: Mutate; onClose: () => void }) {
@@ -16,17 +16,16 @@ export function GoalEditor({ task, mutate, onClose }: { task: Task; mutate: Muta
   const notesId = useId()
   const completedId = useId()
   const titleErrorId = useId()
-  const { draft, update, flush, startComposition, endComposition } = useGoalAutosave(task, mutate)
+  const { draft, update, save, startComposition, endComposition } = useGoalDraft(task, mutate)
   const titleIsEmpty = !draft.title.trim()
   function close() {
-    void flush()
+    void save()
     onClose()
   }
   return <Modal title="Edit goal" hideHeader onClose={close} className="goal-editor" headerContent={<Badge>{task.horizon.charAt(0).toUpperCase() + task.horizon.slice(1)}</Badge>}>
-    <form className="editor-form" onSubmit={async event => {
+    <form className="editor-form" onSubmit={event => {
       event.preventDefault()
-      await flush()
-    }} onBlur={() => { void flush() }} onCompositionStart={startComposition} onCompositionEnd={endComposition}>
+    }} onBlur={() => { void save() }} onCompositionStart={startComposition} onCompositionEnd={endComposition}>
       <div className="grid w-full gap-2">
         <Label htmlFor={titleId}>Title</Label>
         <Input autoFocus type="text" id={titleId} name="title" placeholder="Enter a goal title" value={draft.title} onChange={event => update({ title: event.target.value })} aria-invalid={titleIsEmpty || undefined} aria-describedby={titleIsEmpty ? titleErrorId : undefined} maxLength={240} required />
@@ -37,7 +36,7 @@ export function GoalEditor({ task, mutate, onClose }: { task: Task; mutate: Muta
         <Textarea id={notesId} name="notes" placeholder="Add notes..." className="goal-notes" value={draft.notes} onChange={event => update({ notes: event.target.value })} rows={7} maxLength={5000} />
       </div>
       <div className="flex items-center space-x-2">
-        <Checkbox id={completedId} checked={draft.completed} onCheckedChange={value => update({ completed: value === true }, true)} />
+        <Checkbox id={completedId} checked={draft.completed} onCheckedChange={value => update({ completed: value === true })} />
         <Label htmlFor={completedId}>Completed</Label>
       </div>
     </form>
