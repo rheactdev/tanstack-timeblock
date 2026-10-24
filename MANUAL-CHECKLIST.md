@@ -18,6 +18,15 @@ Verification is left to you. No tests, builds, type checks, or application brows
 - [ ] Redeploy and restart the services. Goals and accounts should persist, the initializer should accept the existing database/index, and the signing secret and credentials should remain unchanged.
 - [ ] Confirm the existing local `compose.yaml` and `.env` still work independently. Existing local data should remain untouched; copy it to Coolify separately if required.
 
+## Profile pictures
+
+- [ ] Configure `S3_KEYID`, `S3_SECRET`, `S3_ENDPOINT`, `S3_REGION`, and `S3_BUCKET` locally and separately in Coolify. Use the existing public bucket and an application key with write access to `avatars/`. Starting the app with no B2 configuration should still allow planning and signing in; only uploading should require it.
+- [ ] Sign in and open the account dialog from the sidebar avatar. Upload a JPEG, PNG, and WebP under 5 MB. Confirm a square WebP appears in the public bucket under `avatars/`, Better Auth stores its public URL in the user's `image` field, and both the account preview and sidebar update without changing the selected planner view, date, filters, or sidebar state.
+- [ ] Reload, sign out and back in, and confirm the picture persists. Replace it and confirm the new URL bypasses the old cached avatar. Old B2 objects should remain untouched. Check a portrait with EXIF orientation and confirm correct rotation, square cropping, and removal of metadata.
+- [ ] Try an empty file, unsupported file, mislabeled non-image, oversized file, and an image over 40 megapixels. Each should show a helpful error and leave the prior avatar intact. A failed storage request should show an error and allow retrying; canceling the file picker should do nothing. During upload, the controls should prevent repeated uploads or signing out.
+- [ ] Sign into two accounts. Uploading a picture should affect only the current account. Guests should have no upload control, and an unauthenticated request to the upload server function should be rejected. Requests and rendered client data must contain no B2 secrets or application keys.
+- [ ] Deploy the Node Docker image through Coolify and upload a picture there. Confirm Sharp's native dependencies are included in Nitro's output and a browser can load the public B2 image URL without signed download URLs or a bucket upload CORS rule. Check account controls at mobile widths and with the keyboard.
+
 ## Layout and BoldKit
 
 - [ ] The Horizons view label uses 18px text. Column headings such as Inbox, Week, Year, and Life remain 22px, sharing its weight, line height, and letter spacing across screen widths and dedicated period views. On desktop Horizons, the view label and first column title share the same left edge; goal rows retain their alignment with the column titles.

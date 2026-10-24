@@ -151,7 +151,7 @@ export function Planner({ initial, search, view }: { initial: WorkspaceData; sea
     {dialog === 'deleted' && <DeletedDialog data={{ ...data, today }} mutate={mutate} onClose={() => setDialog(null)} />}
     {dialog === 'settings' && <SettingsDialog data={data} onClose={() => setDialog(null)} onAccount={() => setDialog('account')} onDeleted={() => setDialog('deleted')} onAppearance={() => setDialog('appearance')} />}
     {dialog === 'appearance' && <AppearanceDialog data={data} mutate={mutate} onClose={() => setDialog(null)} />}
-    {dialog === 'account' && <AccountDialog user={data.user} pendingSaves={saving} onClose={() => setDialog(null)} onChanged={async () => { await router.invalidate(); setDialog(null); go('horizons', { date: undefined, q: '', completed: true, color: 'all', goal: undefined }) }} />}
+    {dialog === 'account' && <AccountDialog user={data.user} pendingSaves={saving} onClose={() => setDialog(null)} onProfileChanged={async () => { await router.invalidate() }} onChanged={async () => { await router.invalidate(); setDialog(null); go('horizons', { date: undefined, q: '', completed: true, color: 'all', goal: undefined }) }} />}
     {dialog === 'help' && <HelpDialog onClose={() => setDialog(null)} />}
     </SidebarInset>
   </>

@@ -5,5 +5,5 @@ import { nitro } from 'nitro/vite'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [tailwindcss(), tanstackStart(), nitro({ preset: 'node-server' }), react()],
+  plugins: [tailwindcss(), tanstackStart(), nitro({ preset: 'node-server', traceDeps: ['sharp*'] }), react()],
 })

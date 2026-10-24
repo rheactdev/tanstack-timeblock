@@ -88,6 +88,10 @@ Use the repository’s `compose.coolify.yaml` for production. The existing `comp
    | `COUCHDB_PASSWORD` | Required: the database administrator password. |
    | `COUCHDB_USER` | Optional; defaults to `timestripe`. |
    | `COUCHDB_DATABASE` | Optional; defaults to `timestripe`. |
+   | `S3_KEYID`, `S3_SECRET` | B2 application key ID and application key; required for profile-picture uploads. |
+   | `S3_ENDPOINT` | B2 S3 endpoint hostname or HTTPS URL, without a bucket path. |
+   | `S3_REGION` | Region matching the B2 S3 endpoint. |
+   | `S3_BUCKET` | Existing public bucket name for profile pictures. |
 
 4. Under Domains, assign your domain to the **app** service with internal port **3000**, for example `https://planner.example.com:3000`. Coolify manages `SERVICE_URL_APP_3000` from that configuration; the Compose file passes its public URL to `BETTER_AUTH_URL` automatically. The `3000` in the generated variable's name selects the internal proxy port; the public URL still uses normal HTTP/HTTPS ports. If you already entered a literal `BETTER_AUTH_URL`, clear that override or set it to `$SERVICE_URL_APP_3000` with interpolation enabled. A manual override should be your public origin, such as `https://planner.example.com`, with no internal-port suffix or `/api/auth` path.
 5. Deploy, then review the application and CouchDB logs and health status.
@@ -101,6 +105,16 @@ The app waits for CouchDB’s authenticated health check, then runs `scripts/ini
 Keep the same signing secret, database credentials, database name, and persistent volume across redeployments. This stack creates a separate database on the Coolify server; existing local CouchDB data is not transferred automatically. Use CouchDB replication or your backup/restore process if you want to move that data.
 
 Deployment has not been run or validated here. The manual deployment checks are in [MANUAL-CHECKLIST.md](MANUAL-CHECKLIST.md).
+
+## Profile pictures with Backblaze B2
+
+Set `S3_KEYID`, `S3_SECRET`, `S3_ENDPOINT`, `S3_REGION`, and `S3_BUCKET` in the server runtime environment. Local development reads the existing `.env`; Coolify deployments need the same variables configured in Coolify. The bucket must already be public and the application key must allow writing files under `avatars/`. A typical endpoint is `https://s3.us-west-004.backblazeb2.com`, with `us-west-004` as its region; use the endpoint and region for your own bucket.
+
+Sign in, open the account dialog from the sidebar avatar, and choose **Upload photo** or **Change photo**. JPEG, PNG, and WebP images up to 5 MB are accepted. The server validates and decodes the file, applies orientation, crops it to a 512 × 512 WebP, and removes metadata before uploading. Images above 40 megapixels are rejected. The public S3 URL is saved through Better Auth's current-user API; profile updates refresh the sidebar without resetting the planner view or filters.
+
+Uploads use a typed POST server function with session-resolved ownership. B2 credentials, image processing, and storage calls stay behind explicit server-only boundaries. The browser never receives storage credentials and needs no bucket upload CORS rule. Existing B2 objects are retained when a picture is replaced; the app uploads a new UUID-named object rather than overwriting or deleting bucket contents. Nitro explicitly traces Sharp into its Node deployment output; build the Docker image for the deployment host's architecture.
+
+This follows [Backblaze's S3-compatible API documentation](https://www.backblaze.com/docs/cloud-storage-s3-compatible-api), [Better Auth's user-update API](https://better-auth.com/docs/concepts/users-accounts#update-user-information), and its [TanStack cookie integration](https://better-auth.com/docs/integrations/tanstack#usage-tips).
 
 No tests, builds, type checks, or application browser checks were run for this rebuild, at the user’s request. Use [MANUAL-CHECKLIST.md](MANUAL-CHECKLIST.md) for the verification handoff. TanStack’s generated route tree is refreshed as implementation code generation; Vite also maintains it during development.
 

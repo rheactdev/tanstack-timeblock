@@ -8,6 +8,7 @@ import { Input } from './ui/input'
 import { Checkbox } from './ui/checkbox'
 import { toast } from './ui/toast'
 import { Modal } from './planner-controls'
+import { ProfilePictureEditor } from './profile-picture-editor'
 import type { Mutate } from './use-workspace'
 
 export function FilterDialog({ search, onChange, onClose }: { search: PlannerSearch; onChange: (patch: Partial<PlannerSearch>) => void; onClose: () => void }) {
@@ -38,12 +39,13 @@ export function AppearanceDialog({ data, mutate, onClose }: { data: WorkspaceDat
   return <Modal title="Background" description="Choose the scenery beside your horizons." onClose={onClose}><div className="scene-choices">{[{ value: 'alpine', label: 'Alpine dusk' }, { value: 'forest', label: 'Forest quiet' }, { value: 'rose', label: 'Golden hour' }].map(scene => <button className={`scene-choice scene-${scene.value} ${data.preferences.scene === scene.value ? 'selected' : ''}`} key={scene.value} onClick={() => void mutate({ action: 'preferences', patch: { scene: scene.value as 'alpine' | 'forest' | 'rose' } })}><span className="scene-thumbnail" /><span>{scene.label}</span>{data.preferences.scene === scene.value && <Check size={17} />}</button>)}</div><Button onClick={onClose}>Done</Button></Modal>
 }
 
-export function AccountDialog({ user, pendingSaves, onClose, onChanged }: { user: WorkspaceData['user']; pendingSaves: boolean; onClose: () => void; onChanged: () => Promise<void> }) {
+export function AccountDialog({ user, pendingSaves, onClose, onChanged, onProfileChanged }: { user: WorkspaceData['user']; pendingSaves: boolean; onClose: () => void; onChanged: () => Promise<void>; onProfileChanged: () => Promise<void> }) {
   const [signup, setSignup] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); if (pendingSaves) return; setError(''); setBusy(true)
+    event.preventDefault(); if (busy || uploading || pendingSaves) return; setError(''); setBusy(true)
     const fields = new FormData(event.currentTarget)
     const credentials = { email: String(fields.get('email')), password: String(fields.get('password')) }
     try {
@@ -52,7 +54,32 @@ export function AccountDialog({ user, pendingSaves, onClose, onChanged }: { user
       else await onChanged()
     } catch { setError('Could not connect. Please try again.') } finally { setBusy(false) }
   }
-  return <Modal title={user ? 'Your account' : signup ? 'Create an account' : 'Sign in'} description={user?.email || 'Keep your goals in your own personal workspace.'} onClose={onClose}>{pendingSaves && <p className="dialog-footnote">Your changes are saving. Account actions will be available when they finish.</p>}{user ? <><p className="account-name">{user.name}</p><Button variant="outline" disabled={busy || pendingSaves} onClick={async () => { setBusy(true); setError(''); try { const result = await authClient.signOut(); if (result.error) setError(result.error.message || 'Could not sign out.'); else await onChanged() } catch { setError('Could not connect. Please try again.') } finally { setBusy(false) } }}>Sign out</Button></> : <><form className="stack-form" onSubmit={submit}>{signup && <label className="field-stack"><span>Name</span><Input name="name" required maxLength={100} autoComplete="name" /></label>}<label className="field-stack"><span>Email</span><Input autoFocus name="email" type="email" required autoComplete="email" /></label><label className="field-stack"><span>Password</span><Input name="password" type="password" minLength={8} required autoComplete={signup ? 'new-password' : 'current-password'} /></label><Button disabled={busy || pendingSaves}>{busy && <LoaderCircle size={15} className="spin" />}{signup ? 'Create account' : 'Sign in'}</Button></form><button className="text-action" onClick={() => { setSignup(!signup); setError('') }}>{signup ? 'Already have an account? Sign in' : 'Create an account'}</button><p className="dialog-footnote">Guest and account workspaces are separate. New accounts start empty.</p></>}{error && <p className="form-error" role="alert">{error}</p>}</Modal>
+  return <Modal title={user ? 'Your account' : signup ? 'Create an account' : 'Sign in'} description={user?.email || 'Keep your goals in your own personal workspace.'} onClose={onClose}>
+    {pendingSaves && <p className="dialog-footnote">Your changes are saving. Account actions will be available when they finish.</p>}
+    {user ? <>
+      <ProfilePictureEditor user={user} disabled={busy || pendingSaves} onBusyChange={setUploading} onChanged={onProfileChanged} />
+      <p className="account-name">{user.name}</p>
+      <Button variant="outline" disabled={busy || uploading || pendingSaves} onClick={async () => {
+        setBusy(true); setError('')
+        try {
+          const result = await authClient.signOut()
+          if (result.error) setError(result.error.message || 'Could not sign out.')
+          else await onChanged()
+        } catch { setError('Could not connect. Please try again.') }
+        finally { setBusy(false) }
+      }}>Sign out</Button>
+    </> : <>
+      <form className="stack-form" onSubmit={submit}>
+        {signup && <label className="field-stack"><span>Name</span><Input name="name" required maxLength={100} autoComplete="name" /></label>}
+        <label className="field-stack"><span>Email</span><Input autoFocus name="email" type="email" required autoComplete="email" /></label>
+        <label className="field-stack"><span>Password</span><Input name="password" type="password" minLength={8} required autoComplete={signup ? 'new-password' : 'current-password'} /></label>
+        <Button disabled={busy || pendingSaves}>{busy && <LoaderCircle size={15} className="spin" />}{signup ? 'Create account' : 'Sign in'}</Button>
+      </form>
+      <button className="text-action" onClick={() => { setSignup(!signup); setError('') }}>{signup ? 'Already have an account? Sign in' : 'Create an account'}</button>
+      <p className="dialog-footnote">Guest and account workspaces are separate. New accounts start empty.</p>
+    </>}
+    {error && <p className="form-error" role="alert">{error}</p>}
+  </Modal>
 }
 
 export function HelpDialog({ onClose }: { onClose: () => void }) {

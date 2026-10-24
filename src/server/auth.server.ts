@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { betterAuth } from 'better-auth'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { couchDBAdapter } from './auth-adapter.server'
 
 let developmentSecret: string | undefined
@@ -33,6 +34,7 @@ function createAuth() {
     database: couchDBAdapter(),
     emailAndPassword: { enabled: true, minPasswordLength: 8 },
     advanced: { database: { generateId: () => crypto.randomUUID() } },
+    plugins: [tanstackStartCookies()],
   })
 }
 export function getAuth() { return instance ??= createAuth() }

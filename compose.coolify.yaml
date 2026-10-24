@@ -23,6 +23,11 @@ services:
       COUCHDB_DATABASE: ${COUCHDB_DATABASE:-timestripe}
       COUCHDB_USER: ${COUCHDB_USER:-timestripe}
       COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:?Set COUCHDB_PASSWORD in Coolify}
+      S3_KEYID: ${S3_KEYID:-}
+      S3_SECRET: ${S3_SECRET:-}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_REGION: ${S3_REGION:-}
+      S3_BUCKET: ${S3_BUCKET:-}
     command:
       - /bin/sh
       - -c
