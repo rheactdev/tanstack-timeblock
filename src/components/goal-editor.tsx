@@ -1,4 +1,5 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
+import { Trash2 } from 'lucide-react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -9,74 +10,93 @@ import { DialogFooter } from './ui/dialog'
 import { Modal, SelectField } from './planner-controls'
 import type { Task } from '../lib/model'
 import { samePeriod, sortedTasks } from '../lib/calendar'
-import { useGoalDraft } from './use-goal-draft'
 import { toast } from './ui/toast'
 import type { Mutate } from './use-workspace'
+
+type EditorAction = 'closing' | 'deleting' | 'duplicating'
 
 export function GoalEditor({ task, mutate, onClose, onDelete }: { task: Task; mutate: Mutate; onClose: () => void; onDelete: (task: Task) => Promise<boolean> }) {
   const titleId = useId()
   const notesId = useId()
   const completedId = useId()
   const titleErrorId = useId()
-  const [deleting, setDeleting] = useState(false)
-  const [duplicating, setDuplicating] = useState(false)
-  const busy = deleting || duplicating
-  const { draft, update, save, startComposition, endComposition, setSavingEnabled } = useGoalDraft(task, mutate)
+  const titleInput = useRef<HTMLInputElement>(null)
+  const [draft, setDraft] = useState({ title: task.title, notes: task.notes, completed: task.completed })
+  const confirmed = useRef(draft)
+  const pendingSave = useRef<Promise<boolean> | null>(null)
+  const [action, setAction] = useState<EditorAction | null>(null)
+  const busy = action !== null
   const titleIsEmpty = !draft.title.trim()
-  function close() {
-    if (busy) return
-    void save()
-    onClose()
-  }
-  async function deleteGoal() {
-    if (busy) return
-    setDeleting(true)
-    let deleted = false
-    try {
-      await save()
-      // Deletion unmounts this editor; skip its normal save-on-close cleanup.
-      setSavingEnabled(false)
-      deleted = await onDelete(task)
-    } finally {
-      if (!deleted) {
-        setSavingEnabled(true)
-        setDeleting(false)
+
+  async function save(): Promise<boolean> {
+    const snapshot = draft
+    // Blur and clicking Close can request the same save; await the first one.
+    while (pendingSave.current) {
+      if (!await pendingSave.current) return false
+    }
+    const next = { ...snapshot, title: snapshot.title.trim() || confirmed.current.title }
+    if (next.title === confirmed.current.title && next.notes === confirmed.current.notes && next.completed === confirmed.current.completed) return true
+    const request = mutate({ action: 'update', id: task.id, patch: next }).then(result => {
+      if (result) {
+        confirmed.current = next
+        return true
       }
+      setDraft(current => ({
+        title: current.title === snapshot.title ? confirmed.current.title : current.title,
+        notes: current.notes === snapshot.notes ? confirmed.current.notes : current.notes,
+        completed: current.completed === snapshot.completed ? confirmed.current.completed : current.completed,
+      }))
+      return false
+    })
+    pendingSave.current = request
+    try {
+      return await request
+    } finally {
+      pendingSave.current = null
     }
   }
-  async function duplicateGoal() {
-    if (busy || titleIsEmpty) return
-    setDuplicating(true)
+
+  async function handleAction(next: EditorAction) {
+    if (busy) return
+    if (next !== 'deleting' && titleIsEmpty) {
+      titleInput.current?.focus()
+      return
+    }
+    setAction(next)
     try {
       if (!await save()) return
-      const result = await mutate({ action: 'duplicate', id: task.id })
-      if (result) toast.success('Goal duplicated')
+      if (next === 'closing') onClose()
+      else if (next === 'deleting') await onDelete(task)
+      else if (await mutate({ action: 'duplicate', id: task.id })) toast.success('Goal duplicated')
     } finally {
-      setDuplicating(false)
+      setAction(null)
     }
   }
-  return <Modal title="Edit goal" hideHeader onClose={close} className="goal-editor" headerContent={<Badge>{task.horizon.charAt(0).toUpperCase() + task.horizon.slice(1)}</Badge>}>
+
+  return <Modal title="Edit goal" hideHeader onClose={() => { void handleAction('closing') }} className="goal-editor" headerContent={<Badge>{task.horizon.charAt(0).toUpperCase() + task.horizon.slice(1)}</Badge>}>
     <form className="editor-form" onSubmit={event => {
       event.preventDefault()
-    }} onBlur={() => { void save() }} onCompositionStart={startComposition} onCompositionEnd={endComposition}>
+    }} aria-busy={busy} onBlur={() => { void save() }}>
       <div className="grid w-full gap-2">
         <Label htmlFor={titleId}>Title</Label>
-        <Input autoFocus type="text" id={titleId} name="title" placeholder="Enter a goal title" value={draft.title} onChange={event => update({ title: event.target.value })} aria-invalid={titleIsEmpty || undefined} aria-describedby={titleIsEmpty ? titleErrorId : undefined} maxLength={240} disabled={busy} required />
+        <Input ref={titleInput} autoFocus type="text" id={titleId} name="title" placeholder="Enter a goal title" value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} aria-invalid={titleIsEmpty || undefined} aria-describedby={titleIsEmpty ? titleErrorId : undefined} maxLength={240} disabled={busy} required />
         {titleIsEmpty && <p id={titleErrorId} className="form-error" role="alert">Title is required.</p>}
       </div>
       <div className="grid w-full gap-2">
         <Label htmlFor={notesId}>Notes & thoughts</Label>
-        <Textarea id={notesId} name="notes" placeholder="Add notes..." className="goal-notes" value={draft.notes} onChange={event => update({ notes: event.target.value })} rows={7} maxLength={5000} disabled={busy} />
+        <Textarea id={notesId} name="notes" placeholder="Add notes..." className="goal-notes" value={draft.notes} onChange={event => setDraft({ ...draft, notes: event.target.value })} rows={7} maxLength={5000} disabled={busy} />
       </div>
       <div className="flex items-center space-x-2">
-        <Checkbox id={completedId} checked={draft.completed} onCheckedChange={value => update({ completed: value === true })} disabled={busy} />
+        <Checkbox id={completedId} checked={draft.completed} onCheckedChange={value => setDraft({ ...draft, completed: value === true })} disabled={busy} />
         <Label htmlFor={completedId}>Completed</Label>
       </div>
     </form>
-    <DialogFooter>
-      <Button type="button" variant="destructive" disabled={busy} onClick={() => { void deleteGoal() }}>{deleting ? 'Deleting…' : 'Delete'}</Button>
-      <Button type="button" disabled={busy || titleIsEmpty} onClick={() => { void duplicateGoal() }}>{duplicating ? 'Duplicating…' : 'Duplicate'}</Button>
-      <Button onClick={() => close()}>Save</Button>
+    <DialogFooter className="flex-col items-start gap-4 sm:items-center sm:justify-between sm:space-x-0" aria-busy={busy}>
+      <Button type="button" size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" disabled={busy} onClick={() => { void handleAction('deleting') }}><Trash2 aria-hidden="true" />{action === 'deleting' ? 'Deleting…' : 'Delete'}</Button>
+      <div className="flex items-center justify-end gap-3 self-end sm:self-auto">
+        <Button type="button" size="sm" variant="outline" disabled={busy || titleIsEmpty} onClick={() => { void handleAction('duplicating') }}>{action === 'duplicating' ? 'Duplicating…' : 'Duplicate'}</Button>
+        <Button type="button" size="sm" disabled={busy} onClick={() => { void handleAction('closing') }}>{action === 'closing' ? 'Saving…' : 'Close'}</Button>
+      </div>
     </DialogFooter>
   </Modal>
 }
