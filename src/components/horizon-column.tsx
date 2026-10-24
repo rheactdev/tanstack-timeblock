@@ -44,7 +44,7 @@ export function HorizonColumn({ schedule, tasks, today, mutate, collapsible, onC
       <form className="add-goal-form" onSubmit={submit} aria-busy={adding}>
         <div className="add-goal-control" data-adding={adding || undefined} onClick={event => { if (!(event.target as Element).closest('button')) input.current?.focus() }}>
           <span className="add-goal-square" aria-hidden />
-          <Input ref={input} aria-label={`Add a goal to ${heading}`} aria-keyshortcuts="Enter" placeholder="Add..." className="add-goal-input" value={title} maxLength={240} disabled={adding} onChange={event => setTitle(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') { setTitle(''); input.current?.blur() } }} />
+          <Input ref={input} aria-label={`Add a goal to ${heading}`} aria-keyshortcuts="Enter" placeholder="Add..." className="add-goal-input block h-full border-0 bg-transparent p-0 shadow-none focus-visible:translate-x-0 focus-visible:translate-y-0" value={title} maxLength={240} disabled={adding} onChange={event => setTitle(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') { setTitle(''); input.current?.blur() } }} />
           <button type="submit" className="add-goal-submit" disabled={adding || !title.trim()} aria-label={adding ? 'Adding goal' : 'Add goal (Enter)'}>
             {adding ? <LoaderCircle size={15} className="spin" aria-hidden /> : <Kbd size="sm" aria-hidden>Enter</Kbd>}
           </button>

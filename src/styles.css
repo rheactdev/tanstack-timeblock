@@ -712,16 +712,21 @@ a:focus-visible {
 .add-goal-input {
   min-width: 0;
   flex: 1;
-  height: 30px;
+  height: 100%;
   border: 0;
   padding: 0;
+  padding-block: 0;
+  padding-inline: 0;
   background: transparent;
   box-shadow: none;
   font-size: 15px;
   font-weight: 400;
-  line-height: 1.65;
+  line-height: normal;
+  text-indent: 0;
+  appearance: none;
   translate: none;
   transform: none;
+  transition: none;
 }
 .add-goal-input::placeholder {
   color: hsl(var(--foreground) / 0.32);
